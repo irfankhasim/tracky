@@ -57,10 +57,10 @@ $cart_count = array_sum(array_column($_SESSION['cart'], 'quantity'));
     <?php endwhile; ?>
   </div>
 </div>
-<div class="container mt-3 mb-5 pb-5">
+<div class="container mt-3 mb-5 pb-5 cart-page-bottom">
   <div class="row g-3" id="menu-grid"><div class="col-12 text-center text-muted py-4">Memuatkan menu...</div></div>
 </div>
-<div class="cart-float d-md-none" id="cart-float" style="<?= $cart_count ? '' : 'display:none' ?>">
+<div class="cart-float" id="cart-float" style="<?= $cart_count ? '' : 'display:none' ?>">
   <a href="/tracky/cart.php" class="btn btn-success btn-lg rounded-pill shadow"><i class="ti ti-shopping-cart"></i> Lihat Troli (<span data-cart-count><?= $cart_count ?></span>)</a>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -2,18 +2,29 @@
 session_start();
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/functions.php';
-$order_no = trim($_GET['order_no'] ?? $_SESSION['last_order']['order_no'] ?? '');
-$order = null; $items = [];
-if ($order_no) {
-    $stmt = mysqli_prepare($conn, 'SELECT * FROM orders WHERE order_no = ? LIMIT 1');
-    mysqli_stmt_bind_param($stmt, 's', $order_no);
-    mysqli_stmt_execute($stmt);
-    $order = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
-    mysqli_stmt_close($stmt);
-    if ($order) $items = getOrderItems($conn, (int)$order['id']);
+
+$order_no = trim($_GET['order_no'] ?? '');
+if ($order_no === '') {
+    header('Location: /tracky/');
+    exit;
 }
-$pm = $order['payment_method'] ?? ($_SESSION['last_order']['payment_method'] ?? 'cash');
-$total = $order ? (float)$order['total_amount'] : (float)($_SESSION['last_order']['total'] ?? 0);
+
+$stmt = mysqli_prepare($conn, 'SELECT * FROM orders WHERE order_no = ? LIMIT 1');
+mysqli_stmt_bind_param($stmt, 's', $order_no);
+mysqli_stmt_execute($stmt);
+$order = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+mysqli_stmt_close($stmt);
+
+if (!$order) {
+    header('Location: /tracky/');
+    exit;
+}
+
+$items = getOrderItems($conn, (int) $order['id']);
+$subtotal = (float) $order['subtotal'];
+$delivery_fee = (float) $order['delivery_fee'];
+$total = (float) $order['total_amount'];
+$pm = $order['payment_method'];
 ?>
 <!DOCTYPE html>
 <html lang="ms">
@@ -27,40 +38,117 @@ $total = $order ? (float)$order['total_amount'] : (float)($_SESSION['last_order'
   <link href="/tracky/assets/css/customer.css" rel="stylesheet">
 </head>
 <body>
-<div class="container py-5 success-page-wrap">
-  <?php if (!$order_no): ?>
-    <div class="text-center"><p class="text-muted">Pesanan tidak dijumpai.</p><a href="/tracky/" class="btn btn-success">Menu</a></div>
-  <?php elseif (!$order): ?>
-    <div class="text-center"><p class="text-muted">Nombor pesanan tidak sah atau tidak dijumpai.</p><a href="/tracky/track.php" class="btn btn-outline-secondary me-2">Semak Order</a><a href="/tracky/" class="btn btn-success">Menu</a></div>
-  <?php else: ?>
-  <div class="success-card text-center mb-4">
-    <div class="success-icon"><i class="ti ti-check"></i></div>
-    <h2 class="fw-bold">Pesanan Berjaya!</h2>
-    <p class="text-muted">Anggaran masa: 30-45 minit</p>
-    <div class="order-no-display"><?= e($order_no) ?></div>
-  </div>
-  <div class="success-card mb-3">
-      <?php foreach ($items as $i): ?>
-      <div class="d-flex justify-content-between mb-2"><span><?= e($i['item_name']) ?> × <?= (int)$i['quantity'] ?></span><span>RM <?= number_format($i['subtotal'],2) ?></span></div>
-      <?php endforeach; ?>
-      <hr>
-      <div class="d-flex justify-content-between fw-bold"><span>Jumlah</span><span class="text-success">RM <?= number_format($total,2) ?></span></div>
+<div class="container py-4 py-md-5 success-page-wrap">
+  <div class="success-card">
+    <div class="text-center mb-4">
+      <div class="success-icon"><i class="ti ti-check"></i></div>
+      <h2 class="fw-bold text-success mb-2">Pesanan Berjaya Dihantar!</h2>
+      <p class="text-muted mb-0">Terima kasih! Pesanan anda sedang diproses.</p>
     </div>
+
+    <div class="order-no-box">
+      <div class="order-no-label">Nombor Pesanan Anda</div>
+      <div class="order-no-value" id="orderNoValue"><?= e($order['order_no']) ?></div>
+      <button type="button" class="copy-btn" onclick="copyOrderNo()">
+        <i class="ti ti-copy"></i> Salin
+      </button>
+    </div>
+    <p class="text-center text-muted small mb-4">Simpan nombor ini untuk semak status penghantaran</p>
+
+    <h6 class="fw-semibold mb-3">Butiran Pesanan</h6>
+    <div class="mb-3 small">
+      <div class="mb-1"><strong>Nama:</strong> <?= e($order['customer_name']) ?></div>
+      <div class="mb-1"><strong>Telefon:</strong> <?= e($order['customer_phone']) ?></div>
+      <div class="mb-1"><strong>Alamat:</strong> <?= e($order['delivery_address']) ?></div>
+      <?php if (!empty($order['notes'])): ?>
+      <div class="mb-1"><strong>Nota:</strong> <?= e($order['notes']) ?></div>
+      <?php endif; ?>
+    </div>
+
+    <div class="table-responsive mb-3">
+      <table class="table table-sm align-middle mb-0">
+        <thead><tr><th>Item</th><th class="text-center">Qty</th><th class="text-end">Harga</th><th class="text-end">Subtotal</th></tr></thead>
+        <tbody>
+          <?php foreach ($items as $i): ?>
+          <tr>
+            <td><?= e($i['item_name']) ?></td>
+            <td class="text-center"><?= (int) $i['quantity'] ?></td>
+            <td class="text-end">RM <?= number_format((float) $i['unit_price'], 2) ?></td>
+            <td class="text-end">RM <?= number_format((float) $i['subtotal'], 2) ?></td>
+          </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="border-top pt-3 mb-4">
+      <div class="d-flex justify-content-between"><span>Subtotal</span><span>RM <?= number_format($subtotal, 2) ?></span></div>
+      <div class="d-flex justify-content-between mt-1"><span>Penghantaran</span><span><?= $delivery_fee > 0 ? 'RM ' . number_format($delivery_fee, 2) : 'PERCUMA' ?></span></div>
+      <div class="d-flex justify-content-between fw-bold fs-5 mt-2"><span>JUMLAH</span><span class="text-success">RM <?= number_format($total, 2) ?></span></div>
+    </div>
+
     <?php if ($pm === 'cash'): ?>
-      <div class="alert alert-info payment-info-stack">Sila sediakan wang tunai kepada runner semasa penghantaran.</div>
+    <div class="payment-info cash">
+      <i class="ti ti-cash" style="color:#1D9E75;font-size:32px"></i>
+      <h6>Pembayaran Tunai (COD)</h6>
+      <p class="mb-0">Sila sediakan wang tunai sebanyak <strong>RM <?= number_format($total, 2) ?></strong> untuk dibayar kepada runner semasa penghantaran.</p>
+    </div>
     <?php else: ?>
-      <div class="bank-details mb-3 payment-info-stack">
-        <h6>Butiran Pindahan</h6>
-        <p class="mb-1">Bank: <strong>Maybank</strong></p>
-        <p class="mb-1">Akaun: <strong>1234567890</strong></p>
-        <p class="mb-1">Nama: <strong>Tracky Food Delivery</strong></p>
-        <p class="mb-1">Jumlah: <strong>RM <?= number_format($total,2) ?></strong></p>
-        <p class="mb-0">Rujukan: <strong><?= e($order_no) ?></strong></p>
-      </div>
+    <div class="payment-info online">
+      <i class="ti ti-building-bank" style="color:#1D9E75;font-size:32px"></i>
+      <h6>Butiran Pindahan Bank</h6>
+      <table class="bank-details">
+        <tr><td>Bank</td><td><strong>Maybank</strong></td></tr>
+        <tr><td>No. Akaun</td><td><strong>1234 5678 9012</strong></td></tr>
+        <tr><td>Nama</td><td><strong>Tracky Food Delivery</strong></td></tr>
+        <tr><td>Jumlah</td><td><strong style="color:#1D9E75">RM <?= number_format($total, 2) ?></strong></td></tr>
+        <tr><td>Rujukan</td><td><strong><?= e($order['order_no']) ?></strong></td></tr>
+      </table>
+      <p class="mt-2 text-muted small mb-0">
+        Sila hantar bukti pembayaran ke WhatsApp:
+        <a href="https://wa.me/60123456789?text=Bukti+bayaran+<?= urlencode($order['order_no']) ?>">012-345 6789</a>
+      </p>
+    </div>
     <?php endif; ?>
-    <a href="/tracky/track.php?order_no=<?= urlencode($order_no) ?>" class="btn btn-success btn-lg w-100 mb-2">Track My Order</a>
-    <a href="/tracky/" class="btn btn-outline-secondary w-100">Pesan Lagi</a>
-  <?php endif; ?>
+
+    <div class="next-steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>Pesanan anda sedang disemak oleh restoran</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>Runner akan di-assign untuk menghantar pesanan anda</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>Anggaran masa penghantaran: 30-45 minit</div>
+      </div>
+    </div>
+
+    <a href="/tracky/track.php?order_no=<?= urlencode($order['order_no']) ?>" class="btn btn-success btn-lg w-100 mb-3">
+      <i class="ti ti-map-pin"></i> Semak Status Penghantaran
+    </a>
+    <a href="/tracky/" class="btn btn-outline-secondary w-100">
+      <i class="ti ti-arrow-left"></i> Kembali ke Menu
+    </a>
+  </div>
 </div>
+<script>
+function copyOrderNo() {
+  const text = document.getElementById('orderNoValue').textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.innerHTML = '<i class="ti ti-check"></i> Disalin!';
+    btn.style.background = '#1D9E75';
+    btn.style.color = 'white';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="ti ti-copy"></i> Salin';
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 2000);
+  });
+}
+</script>
 </body>
 </html>
