@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tracky — Food Delivery Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <style>
+    :root { --green: #1D9E75; --dark: #0a0a0f; }
+    body { font-family: Inter, sans-serif; background: var(--dark); color: #e5e7eb; }
+    .navbar { background: rgba(10,10,15,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .hero { min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; }
+    .hero::before { content:''; position:absolute; inset:0; background-image: radial-gradient(rgba(29,158,117,0.15) 1px, transparent 1px); background-size: 24px 24px; opacity: 0.5; }
+    .hero h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.1; }
+    .text-green { color: var(--green); }
+    .btn-green { background: var(--green); border: none; color: #fff; padding: 12px 28px; border-radius: 10px; font-weight: 600; }
+    .btn-green:hover { background: #0F6E56; color: #fff; }
+    .feature-card { background: #12121a; border: 1px solid #222; border-radius: 16px; padding: 28px; height: 100%; }
+    .step-num { width: 48px; height: 48px; border-radius: 12px; background: rgba(29,158,117,0.15); color: var(--green); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; }
+    .cta-section { background: linear-gradient(135deg, #1D9E75, #0F6E56); border-radius: 24px; }
+    footer { border-top: 1px solid #222; padding: 40px 0; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-dark fixed-top py-3">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand fw-bold" href="#"><i class="ti ti-bike text-green"></i> Tracky</a>
+    <div class="d-none d-md-flex gap-4">
+      <a href="#how" class="text-secondary text-decoration-none">How It Works</a>
+      <a href="#features" class="text-secondary text-decoration-none">Features</a>
+      <a href="/tracky/track.php" class="text-secondary text-decoration-none">Track Order</a>
+    </div>
+    <a href="/tracky/" class="btn btn-green btn-sm">Order Sekarang</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container position-relative py-5">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7" data-aos="fade-up">
+        <p class="text-green fw-semibold mb-3">Platform Penghantaran Makanan</p>
+        <h1>Pesan Makanan.<br>Kami <span class="text-green">Hantar</span> Terus.</h1>
+        <p class="lead text-secondary mt-4 mb-4" style="max-width:520px">Tracky — sistem ordering & delivery untuk restoran. Pelanggan order, admin assign runner, runner hantar. Semua dalam satu platform.</p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="/tracky/" class="btn btn-green btn-lg">Order Sekarang</a>
+          <a href="/tracky/login.php" class="btn btn-outline-light btn-lg">Log Masuk</a>
+        </div>
+      </div>
+      <div class="col-lg-5" data-aos="fade-left">
+        <div class="feature-card p-4">
+          <div class="d-flex gap-3 mb-3"><i class="ti ti-clock text-green fs-3"></i><div><strong>30-45 minit</strong><br><small class="text-secondary">Penghantaran pantas</small></div></div>
+          <div class="d-flex gap-3 mb-3"><i class="ti ti-map-pin text-green fs-3"></i><div><strong>Kawasan Melaka</strong><br><small class="text-secondary">Coverage luas</small></div></div>
+          <div class="d-flex gap-3"><i class="ti ti-truck text-green fs-3"></i><div><strong>Free delivery &gt; RM30</strong><br><small class="text-secondary">Jimat kos</small></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="py-5">
+  <div class="container py-5">
+    <h2 class="text-center fw-bold mb-5" data-aos="fade-up">How It Works</h2>
+    <div class="row g-4">
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
+        <div class="feature-card text-center"><div class="step-num mx-auto mb-3">1</div><h5>Customer Order</h5><p class="text-secondary small">Pilih menu, isi alamat, bayar COD atau online. Tiada login diperlukan.</p></div>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="feature-card text-center"><div class="step-num mx-auto mb-3">2</div><h5>Admin Assign</h5><p class="text-secondary small">Admin terima notifikasi, assign runner yang tersedia untuk pickup.</p></div>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="feature-card text-center"><div class="step-num mx-auto mb-3">3</div><h5>Runner Hantar</h5><p class="text-secondary small">Runner update status real-time. Customer track order sehingga sampai.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="py-5 bg-black bg-opacity-25">
+  <div class="container py-4">
+    <h2 class="text-center fw-bold mb-5">Features</h2>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3"><div class="feature-card"><i class="ti ti-shopping-cart text-green fs-2 mb-3"></i><h6>Guest Checkout</h6><p class="text-secondary small mb-0">Order tanpa daftar akaun</p></div></div>
+      <div class="col-md-6 col-lg-3"><div class="feature-card"><i class="ti ti-route text-green fs-2 mb-3"></i><h6>Runner Assignment</h6><p class="text-secondary small mb-0">Assign runner dengan satu klik</p></div></div>
+      <div class="col-md-6 col-lg-3"><div class="feature-card"><i class="ti ti-map-pin text-green fs-2 mb-3"></i><h6>Live Tracking</h6><p class="text-secondary small mb-0">Track order secara real-time</p></div></div>
+      <div class="col-md-6 col-lg-3"><div class="feature-card"><i class="ti ti-chart-bar text-green fs-2 mb-3"></i><h6>Admin Dashboard</h6><p class="text-secondary small mb-0">Laporan & analytics lengkap</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="container py-5">
+  <div class="cta-section text-center p-5" data-aos="zoom-in">
+    <h2 class="fw-bold mb-3">Ready to Order?</h2>
+    <p class="mb-4 opacity-75">Pesan sekarang dari Restoran Selera Nusantara</p>
+    <a href="/tracky/" class="btn btn-light btn-lg fw-semibold">Order Sekarang</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div class="fw-bold"><i class="ti ti-bike text-green"></i> Tracky</div>
+    <div class="d-flex gap-3 small">
+      <a href="/tracky/" class="text-secondary">Menu</a>
+      <a href="/tracky/track.php" class="text-secondary">Track</a>
+      <a href="/tracky/login.php" class="text-secondary">Log Masuk</a>
+    </div>
+    <div class="text-secondary small">&copy; 2026 Tracky</div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>AOS.init({ duration: 700, once: true });</script>
+</body>
+</html>
