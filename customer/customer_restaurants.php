@@ -13,14 +13,6 @@ while ($res && $row = mysqli_fetch_assoc($res)) {
 }
 
 $total = count($restaurants);
-$open_count = 0;
-foreach ($restaurants as $r) {
-    if ((int) ($r['is_open'] ?? 1) === 1) {
-        $open_count++;
-    }
-}
-$items_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) c FROM menu_items m JOIN restaurants r ON r.id = m.restaurant_id WHERE r.is_active = 1 AND m.is_available = 1"));
-$total_items = (int) ($items_row['c'] ?? 0);
 ?>
 <!DOCTYPE html>
 <html lang="ms">
@@ -108,13 +100,6 @@ $total_items = (int) ($items_row['c'] ?? 0);
       border-color: var(--green);
       box-shadow: 0 0 0 4px var(--green-dim);
     }
-    .resto-stats {
-      display: inline-flex; gap: 30px;
-      padding-top: 24px; border-top: 1px solid var(--border);
-    }
-    .resto-stat .num { font-size: 1.5rem; font-weight: 900; color: var(--text); line-height: 1; }
-    .resto-stat .lbl { font-size: 0.72rem; color: var(--muted); margin-top: 5px; letter-spacing: 0.04em; text-transform: uppercase; }
-
     .resto-section { max-width: 1100px; margin: 0 auto; padding: 40px 20px 60px; }
     .resto-section-head {
       display: flex; align-items: flex-end; justify-content: space-between;
@@ -252,7 +237,6 @@ $total_items = (int) ($items_row['c'] ?? 0);
     }
     @media (max-width: 560px) {
       .resto-hero { padding: 44px 16px 38px; }
-      .resto-stats { gap: 22px; }
       .resto-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -286,11 +270,6 @@ $total_items = (int) ($items_row['c'] ?? 0);
     <div class="resto-search">
       <i class="ti ti-search"></i>
       <input type="text" id="restoSearch" placeholder="Cari restoran..." autocomplete="off" aria-label="Cari restoran">
-    </div>
-    <div class="resto-stats">
-      <div class="resto-stat"><div class="num"><?= $total ?></div><div class="lbl">Restoran</div></div>
-      <div class="resto-stat"><div class="num"><?= $open_count ?></div><div class="lbl">Dibuka</div></div>
-      <div class="resto-stat"><div class="num"><?= $total_items ?></div><div class="lbl">Hidangan</div></div>
     </div>
   </div>
 </header>
