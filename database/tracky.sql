@@ -141,7 +141,8 @@ CREATE TABLE notifications (
 -- ── Restaurants (multi-tenant) ──
 INSERT INTO restaurants (id, name, slug, address, phone, email, accent_color, cover_image) VALUES
 (1, 'Restoran Selera Nusantara', 'restoran-selera', 'No 5, Jalan Merdeka, Ayer Keroh, 75450 Melaka', '+60 6-234 5678', 'info@seleranusantara.com', '#1D9E75', 'assets/uploads/restaurants/cover_1.jpg'),
-(2, 'Warung Pak Abu', 'warung-pak-abu', 'No 12, Jalan Hang Tuah, 75300 Melaka', '+60 6-987 6543', 'hello@warungpakabu.com', '#1D9E75', 'assets/uploads/restaurants/cover_2.jpg');
+(2, 'Warung Pak Abu', 'warung-pak-abu', 'No 12, Jalan Hang Tuah, 75300 Melaka', '+60 6-987 6543', 'hello@warungpakabu.com', '#1D9E75', 'assets/uploads/restaurants/cover_2.jpg'),
+(3, 'Restoran Pak Abu 2', 'restoran-pak-abu-2', 'No 8, Jalan Bukit Beruang, 75450 Melaka', '+60 6-231 2233', 'cawangan2@warungpakabu.com', '#1D9E75', 'assets/uploads/restaurants/cover_3.jpg');
 
 -- ── Users ──
 -- superadmin: password = superadmin123  | admin: admin123 | runner: runner123 | staff: staff123
@@ -153,7 +154,8 @@ INSERT INTO users (name, email, password, role, phone, restaurant_id) VALUES
 ('Admin Pak Abu', 'admin2@tracky.com', '$2y$10$pg/rjTa3qk.Pdi1QYjqrHOcgA3MCsnP9eGVGZiKwFp7eMdCMRkJaG', 'admin', '+60 12-444 4444', 2),
 ('Zaki Runner', 'runner3@tracky.com', '$2y$10$JBO8zIgcyHKj..9v1PlzSuhbkuQZWOEbBCcW0pxOUorQIb4CBB8jK', 'runner', '+60 12-555 5555', 2),
 ('Staf Selera', 'staffselera@tracky.com', '$2y$10$uKpUe8s0lKgZl9L9TIswIefSvrndw.NS78v1Y.XQMMilpXLy0uZie', 'staff', '+60 12-666 6666', 1),
-('Staf Pak Abu', 'staffpakabu@tracky.com', '$2y$10$uKpUe8s0lKgZl9L9TIswIefSvrndw.NS78v1Y.XQMMilpXLy0uZie', 'staff', '+60 12-777 7777', 2);
+('Staf Pak Abu', 'staffpakabu@tracky.com', '$2y$10$uKpUe8s0lKgZl9L9TIswIefSvrndw.NS78v1Y.XQMMilpXLy0uZie', 'staff', '+60 12-777 7777', 2),
+('Admin Pak Abu 2', 'admin3@tracky.com', '$2y$10$pg/rjTa3qk.Pdi1QYjqrHOcgA3MCsnP9eGVGZiKwFp7eMdCMRkJaG', 'admin', '+60 12-888 8888', 3);
 
 INSERT INTO runners (user_id, restaurant_id, vehicle_no, phone, status) VALUES
 (3, 1, 'MKM 1234', '+60 12-222 2222', 'online'),
@@ -166,7 +168,9 @@ INSERT INTO categories (id, restaurant_id, name, description, is_active, sort_or
 (2, 1, 'Mee & Bihun', 'Mee goreng, mee sup dan banyak lagi', 1, 2),
 (3, 1, 'Minuman', 'Minuman sejuk dan panas', 1, 3),
 (5, 2, 'Western', 'Hidangan western pilihan', 1, 1),
-(6, 2, 'Minuman', 'Minuman sejuk dan panas', 1, 2);
+(6, 2, 'Minuman', 'Minuman sejuk dan panas', 1, 2),
+(7, 3, 'Western', 'Hidangan western pilihan', 1, 1),
+(8, 3, 'Minuman', 'Minuman sejuk dan panas', 1, 2);
 
 INSERT INTO menu_items (restaurant_id, category_id, name, description, price, is_available, image) VALUES
 (1, 1, 'Nasi Lemak Ayam', 'Nasi lemak dengan ayam goreng, sambal, telur dan timun', 12.00, 1, 'assets/uploads/menu/item_1.jpg'),
@@ -182,7 +186,14 @@ INSERT INTO menu_items (restaurant_id, category_id, name, description, price, is
 (2, 5, 'Spaghetti Bolognese', 'Spaghetti dengan sos daging', 13.00, 1, 'assets/uploads/menu/item_14.jpg'),
 (2, 5, 'Grilled Fish & Chips', 'Ikan panggang dengan kentang goreng', 16.00, 1, 'assets/uploads/menu/item_15.jpg'),
 (2, 6, 'Iced Lemon Tea', 'Teh lemon sejuk', 4.50, 1, 'assets/uploads/menu/item_16.jpg'),
-(2, 6, 'Kopi O Ais', 'Kopi hitam sejuk', 3.00, 1, 'assets/uploads/menu/item_17.jpg');
+(2, 6, 'Kopi O Ais', 'Kopi hitam sejuk', 3.00, 1, 'assets/uploads/menu/item_17.jpg'),
+(3, 7, 'Chicken Chop', 'Ayam panggang dengan kentang goreng dan sos lada hitam', 15.00, 1, 'assets/uploads/menu/item_18.jpg'),
+(3, 7, 'Lamb Chop', 'Daging kambing panggang dengan sos mint', 22.00, 1, 'assets/uploads/menu/item_19.jpg'),
+(3, 7, 'Beef Burger Special', 'Burger daging dengan keju, salad dan kentang', 13.00, 1, 'assets/uploads/menu/item_20.jpg'),
+(3, 7, 'Spaghetti Carbonara', 'Spaghetti krim dengan daging salai dan parmesan', 14.00, 1, 'assets/uploads/menu/item_21.jpg'),
+(3, 7, 'Grilled Fish & Chips', 'Ikan goreng rangup dengan kentang goreng', 16.00, 1, 'assets/uploads/menu/item_22.jpg'),
+(3, 8, 'Iced Lemon Tea', 'Teh lemon sejuk yang menyegarkan', 4.50, 1, 'assets/uploads/menu/item_23.jpg'),
+(3, 8, 'Orange Juice', 'Jus oren segar', 5.00, 1, 'assets/uploads/menu/item_24.jpg');
 
 INSERT INTO notifications (restaurant_id, title, message, type, is_read) VALUES
 (1, 'Selamat Datang', 'Sistem Tracky telah berjaya dipasang', 'system', 0),
