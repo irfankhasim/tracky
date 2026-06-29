@@ -7,14 +7,15 @@ header('Content-Type: application/json; charset=utf-8');
 $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 $order_id = (int) ($input['order_id'] ?? 0);
 $user_id = (int) $_SESSION['user_id'];
+$rid = activeRestaurantId();
 
 if ($order_id < 1) {
     echo json_encode(['success' => false, 'message' => 'Order tidak sah']);
     exit;
 }
 
-$dstmt = mysqli_prepare($conn, "SELECT d.*, o.order_no, o.status AS order_status FROM deliveries d JOIN orders o ON o.id = d.order_id WHERE d.order_id = ? AND d.status IN ('assigned','picked_up','in_transit') ORDER BY d.id DESC LIMIT 1");
-mysqli_stmt_bind_param($dstmt, 'i', $order_id);
+$dstmt = mysqli_prepare($conn, "SELECT d.*, o.order_no, o.status AS order_status FROM deliveries d JOIN orders o ON o.id = d.order_id WHERE d.order_id = ? AND o.restaurant_id = ? AND d.status IN ('assigned','picked_up','in_transit') ORDER BY d.id DESC LIMIT 1");
+mysqli_stmt_bind_param($dstmt, 'ii', $order_id, $rid);
 mysqli_stmt_execute($dstmt);
 $delivery = mysqli_fetch_assoc(mysqli_stmt_get_result($dstmt));
 mysqli_stmt_close($dstmt);
@@ -59,7 +60,7 @@ if (!$ok1 || !$ok2 || !$ok3) {
 }
 
 logStatusChange($conn, $order_id, $old_status, 'delivered', $user_id);
-addNotification($conn, 'Order Delivered', "Order {$delivery['order_no']} ditandakan selesai oleh admin.", 'delivery');
+addNotification($conn, 'Order Delivered', "Order {$delivery['order_no']} ditandakan selesai oleh admin.", 'delivery', $rid);
 mysqli_commit($conn);
 
 echo json_encode(['success' => true, 'message' => 'Order ditandakan sebagai dihantar']);

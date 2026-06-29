@@ -1,14 +1,14 @@
 async function loadMenu(categoryId = 'all') {
   const url = categoryId === 'all'
-    ? '/tracky/api/get_menu.php'
-    : `/tracky/api/get_menu.php?category=${encodeURIComponent(categoryId)}`;
+    ? '/tracky/api/customer_get_menu.php'
+    : `/tracky/api/customer_get_menu.php?category=${encodeURIComponent(categoryId)}`;
   const res = await fetch(url);
   return res.json();
 }
 
 async function cartAction(action, payload = {}) {
   const body = new URLSearchParams({ action, ...payload });
-  const res = await fetch('/tracky/api/cart.php', {
+  const res = await fetch('/tracky/api/customer_cart.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
@@ -17,7 +17,7 @@ async function cartAction(action, payload = {}) {
 }
 
 async function getCart() {
-  const res = await fetch('/tracky/api/cart.php?action=get');
+  const res = await fetch('/tracky/api/customer_cart.php?action=get');
   return res.json();
 }
 

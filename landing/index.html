@@ -3,113 +3,844 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tracky — Food Delivery Platform</title>
+  <link rel="icon" type="image/png" href="/tracky/assets/img/favicon-64.png">
+  <link rel="apple-touch-icon" href="/tracky/assets/img/apple-touch-icon.png">
+  <title>Tracky — Platform Penghantaran Makanan</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <style>
-    :root { --green: #1D9E75; --dark: #0a0a0f; }
-    body { font-family: Inter, sans-serif; background: var(--dark); color: #e5e7eb; }
-    .navbar { background: rgba(10,10,15,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06); }
-    .hero { min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; }
-    .hero::before { content:''; position:absolute; inset:0; background-image: radial-gradient(rgba(29,158,117,0.15) 1px, transparent 1px); background-size: 24px 24px; opacity: 0.5; }
-    .hero h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.1; }
-    .text-green { color: var(--green); }
-    .btn-green { background: var(--green); border: none; color: #fff; padding: 12px 28px; border-radius: 10px; font-weight: 600; }
-    .btn-green:hover { background: #0F6E56; color: #fff; }
-    .feature-card { background: #12121a; border: 1px solid #222; border-radius: 16px; padding: 28px; height: 100%; }
-    .step-num { width: 48px; height: 48px; border-radius: 12px; background: rgba(29,158,117,0.15); color: var(--green); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; }
-    .cta-section { background: linear-gradient(135deg, #1D9E75, #0F6E56); border-radius: 24px; }
-    footer { border-top: 1px solid #222; padding: 40px 0; }
+    :root {
+      --green: #1D9E75;
+      --green-light: #22C55E;
+      --green-dim: rgba(29,158,117,0.12);
+      --dark: #080B0F;
+      --dark2: #0E1117;
+      --dark3: #141820;
+      --border: rgba(255,255,255,0.07);
+      --text-muted: #6B7280;
+      --body-color: #E5E7EB;
+    }
+
+    body.light-mode {
+      --dark: #F8FAFC;
+      --dark2: #F1F5F9;
+      --dark3: #FFFFFF;
+      --border: rgba(0,0,0,0.08);
+      --text-muted: #64748B;
+      --body-color: #1E293B;
+      --green-dim: rgba(29,158,117,0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--body-color);
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      background: rgba(8,11,15,0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+      transition: all 0.3s;
+    }
+    body.light-mode .navbar { background: rgba(248,250,252,0.85); }
+    body.light-mode .navbar.scrolled { background: rgba(248,250,252,0.97); }
+    .navbar.scrolled {
+      background: rgba(8,11,15,0.95);
+      padding: 10px 0;
+    }
+    .navbar-brand {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff !important;
+      letter-spacing: -0.5px;
+    }
+    body.light-mode .navbar-brand { color: #0F172A !important; }
+    .navbar-brand span { color: var(--green); }
+    .nav-link-item {
+      position: relative;
+      color: var(--text-muted) !important;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.25s ease;
+      padding: 6px 0;
+    }
+    .nav-link-item::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--green);
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.25s ease;
+    }
+    .nav-link-item:hover::after,
+    .nav-link-item:focus-visible::after,
+    .nav-link-item.active::after { transform: scaleX(1); }
+    .nav-link-item:hover,
+    .nav-link-item.active { color: #fff !important; }
+    body.light-mode .nav-link-item:hover,
+    body.light-mode .nav-link-item.active { color: #0F172A !important; }
+    .btn-nav {
+      background: var(--green);
+      color: #fff !important;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-nav:hover { background: #15875f; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding-top: 80px;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(29,158,117,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 60%, rgba(29,158,117,0.08) 0%, transparent 60%);
+    }
+    body.light-mode .hero-bg {
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(29,158,117,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 60%, rgba(29,158,117,0.05) 0%, transparent 60%);
+    }
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 100%);
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--green-dim);
+      border: 1px solid rgba(29,158,117,0.3);
+      color: var(--green);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 100px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(2.6rem, 6vw, 5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      color: #fff;
+    }
+    body.light-mode .hero h1 { color: #0F172A; }
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--green), #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 24px 0 36px;
+    }
+    .btn-primary-cta {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s;
+      box-shadow: 0 0 30px rgba(29,158,117,0.35);
+    }
+    .btn-primary-cta:hover {
+      background: #15875f;
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px rgba(29,158,117,0.5);
+    }
+    .btn-secondary-cta {
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      border: 1px solid var(--border);
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s;
+      backdrop-filter: blur(8px);
+    }
+    .btn-secondary-cta:hover {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .stat-item .stat-num {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .stat-item .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Hero Card */
+    .hero-card {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(29,158,117,0.5), transparent);
+    }
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+      transition: all 0.2s;
+    }
+    .info-row:last-child { margin-bottom: 0; }
+    .info-row:hover { background: rgba(29,158,117,0.05); border-color: rgba(29,158,117,0.2); }
+    .info-icon {
+      width: 42px; height: 42px;
+      background: var(--green-dim);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .info-text strong { font-size: 0.9rem; color: #fff; display: block; }
+    .info-text small { font-size: 0.78rem; color: var(--text-muted); }
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.25);
+      color: #22C55E;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 100px;
+      margin-bottom: 16px;
+    }
+    .live-dot {
+      width: 6px; height: 6px;
+      background: #22C55E;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── SECTION TITLES ── */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: #fff;
+    }
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ── HOW IT WORKS ── */
+    #how { padding: 100px 0; }
+    .step-card {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 28px;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .step-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--green), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .step-card:hover { border-color: rgba(29,158,117,0.3); transform: translateY(-4px); }
+    .step-card:hover::after { opacity: 1; }
+    .step-num {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: var(--green-dim);
+      border: 1px solid rgba(29,158,117,0.2);
+      color: var(--green);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800;
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+    }
+    .step-card h5 { font-weight: 700; font-size: 1.05rem; margin-bottom: 10px; color: #fff; }
+    .step-card p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.65; margin: 0; }
+    .step-connector {
+      position: absolute;
+      top: 50px; right: -20px;
+      width: 40px; height: 2px;
+      background: linear-gradient(90deg, rgba(29,158,117,0.4), transparent);
+      display: none;
+    }
+    @media (min-width: 768px) { .step-connector { display: block; } }
+
+    /* ── FEATURES ── */
+    #features { padding: 100px 0; background: var(--dark2); }
+    .feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (min-width: 992px) { .feature-grid { grid-template-columns: repeat(4, 1fr); } }
+    .feature-card {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card:hover { border-color: rgba(29,158,117,0.3); transform: translateY(-3px); }
+    .feature-icon {
+      width: 48px; height: 48px;
+      background: var(--green-dim);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green);
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+    }
+    .feature-card h6 { font-weight: 700; font-size: 0.9rem; color: #fff; margin-bottom: 8px; }
+    .feature-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; margin: 0; }
+
+    /* ── TESTIMONIAL / TRUST ── */
+    #trust { padding: 100px 0; }
+    .trust-card {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      height: 100%;
+      transition: all 0.3s;
+    }
+    .trust-card:hover { border-color: rgba(29,158,117,0.25); }
+    .stars { color: #F59E0B; font-size: 0.85rem; margin-bottom: 14px; }
+    .trust-card p { color: #D1D5DB; font-size: 0.875rem; line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+    .trust-author { display: flex; align-items: center; gap: 12px; }
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--green-dim);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .author-name { font-size: 0.875rem; font-weight: 600; color: #fff; }
+    .author-role { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ── CTA ── */
+    .cta-section {
+      margin: 0 0 100px;
+      background: linear-gradient(135deg, #0F6E56 0%, #1D9E75 50%, #15a876 100%);
+      border-radius: 24px;
+      padding: 80px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .cta-section h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; color: #fff; letter-spacing: -1px; }
+    .cta-section p { color: rgba(255,255,255,0.75); font-size: 1rem; margin: 12px 0 32px; }
+    .btn-cta-white {
+      background: #fff;
+      color: #0F6E56;
+      border: none;
+      padding: 14px 36px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s;
+    }
+    .btn-cta-white:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.2); color: #0F6E56; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark2);
+      border-top: 1px solid var(--border);
+      padding: 48px 0 32px;
+    }
+    .footer-brand { font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .footer-brand span { color: var(--green); }
+    .footer-tagline { font-size: 0.8rem; color: var(--text-muted); }
+    .footer-links a {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--green); }
+    .footer-bottom {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .footer-bottom span { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* ── UTILITIES ── */
+    .text-green { color: var(--green) !important; }
+    .divider { width: 40px; height: 3px; background: var(--green); border-radius: 2px; margin: 16px auto 0; }
+
+    /* ── LIGHT MODE overrides ── */
+    body.light-mode .hero-desc { color: #475569; }
+    body.light-mode .btn-secondary-cta { background: rgba(0,0,0,0.05); color: #0F172A; border-color: rgba(0,0,0,0.12); }
+    body.light-mode .btn-secondary-cta:hover { background: rgba(0,0,0,0.08); color: #0F172A; }
+    body.light-mode .hero-stats { border-top-color: rgba(0,0,0,0.08); }
+    body.light-mode .stat-item .stat-num { color: #0F172A; }
+    body.light-mode .stat-item .stat-label { color: #64748B; }
+    body.light-mode .hero-card { box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    body.light-mode .info-row { background: rgba(0,0,0,0.02); }
+    body.light-mode .info-row:hover { background: rgba(29,158,117,0.05); }
+    body.light-mode .info-text strong { color: #0F172A; }
+    body.light-mode .section-title { color: #0F172A; }
+    body.light-mode .section-desc { color: #64748B; }
+    body.light-mode .step-card h5 { color: #0F172A; }
+    body.light-mode .step-card p { color: #64748B; }
+    body.light-mode .step-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    body.light-mode .feature-card h6 { color: #0F172A; }
+    body.light-mode .feature-card p { color: #64748B; }
+    body.light-mode .trust-card p { color: #374151; }
+    body.light-mode .author-name { color: #0F172A; }
+    body.light-mode .author-role { color: #64748B; }
+    body.light-mode .footer-brand { color: #0F172A; }
+    body.light-mode .footer-tagline { color: #64748B; }
+    body.light-mode .footer-bottom span { color: #64748B; }
+    body.light-mode #features { background: #EFF6FF; }
+
+    /* ── THEME TOGGLE BUTTON ── */
+    .theme-toggle {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .theme-toggle:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    body.light-mode .theme-toggle { background: rgba(0,0,0,0.05); color: #64748B; }
+    body.light-mode .theme-toggle:hover { background: rgba(0,0,0,0.1); color: #0F172A; }
   </style>
 </head>
 <body>
-<nav class="navbar navbar-dark fixed-top py-3">
+
+<!-- NAVBAR -->
+<nav class="navbar fixed-top" id="navbar">
   <div class="container d-flex justify-content-between align-items-center">
-    <a class="navbar-brand fw-bold" href="#"><i class="ti ti-bike text-green"></i> Tracky</a>
-    <div class="d-none d-md-flex gap-4">
-      <a href="#how" class="text-secondary text-decoration-none">How It Works</a>
-      <a href="#features" class="text-secondary text-decoration-none">Features</a>
-      <a href="/tracky/track.php" class="text-secondary text-decoration-none">Track Order</a>
+    <a class="navbar-brand" href="#">
+      <img src="/tracky/assets/img/icon.png" alt="Tracky" style="width:32px;height:32px;border-radius:8px;object-fit:cover;vertical-align:middle;margin-right:8px">Trac<span>ky</span>
+    </a>
+    <div class="d-none d-md-flex align-items-center gap-4">
+      <a href="#how" class="nav-link-item">How It Works</a>
+      <a href="#features" class="nav-link-item">Features</a>
+      <a href="#trust" class="nav-link-item">Testimonial</a>
+      <a href="/tracky/customer/customer_track.php" class="nav-link-item">Track Order</a>
     </div>
-    <a href="/tracky/" class="btn btn-green btn-sm">Order Sekarang</a>
+    <div class="d-flex align-items-center gap-2">
+      <a href="/tracky/login.php" class="nav-link-item d-none d-md-inline-flex align-items-center gap-1">
+        <i class="ti ti-login" style="font-size:1rem"></i> Log Masuk
+      </a>
+      <button class="theme-toggle" id="themeToggle" title="Tukar tema" onclick="toggleTheme()">
+        <i class="ti ti-moon" id="themeIcon"></i>
+      </button>
+      <a href="/tracky/customer/customer_restaurants.php" class="btn-nav">
+        <i class="ti ti-shopping-bag"></i> Order Sekarang
+      </a>
+    </div>
   </div>
 </nav>
 
+<!-- HERO -->
 <section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
   <div class="container position-relative py-5">
     <div class="row align-items-center g-5">
-      <div class="col-lg-7" data-aos="fade-up">
-        <p class="text-green fw-semibold mb-3">Platform Penghantaran Makanan</p>
-        <h1>Pesan Makanan.<br>Kami <span class="text-green">Hantar</span> Terus.</h1>
-        <p class="lead text-secondary mt-4 mb-4" style="max-width:520px">Tracky — sistem ordering & delivery untuk restoran. Pelanggan order, admin assign runner, runner hantar. Semua dalam satu platform.</p>
+      <div class="col-lg-6" data-aos="fade-up" data-aos-duration="800">
+        <div class="badge-pill">
+          <i class="ti ti-map-pin"></i>
+          Kawasan Melaka
+        </div>
+        <h1>Pesan Makanan.<br><span class="highlight">Kami Hantar.</span><br>Sekarang.</h1>
+        <p class="hero-desc">Platform penghantaran makanan yang menghubungkan pelanggan, restoran, dan runner dalam satu sistem yang mudah dan pantas.</p>
         <div class="d-flex flex-wrap gap-3">
-          <a href="/tracky/" class="btn btn-green btn-lg">Order Sekarang</a>
-          <a href="/tracky/login.php" class="btn btn-outline-light btn-lg">Log Masuk</a>
+          <a href="/tracky/customer/customer_restaurants.php" class="btn-primary-cta">
+            <i class="ti ti-shopping-bag"></i> Order Sekarang
+          </a>
+          <a href="/tracky/login.php" class="btn-secondary-cta">
+            <i class="ti ti-login"></i> Log Masuk
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-num">30–45</div>
+            <div class="stat-label">Minit penghantaran</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">RM0</div>
+            <div class="stat-label">Delivery fee > RM30</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">COD</div>
+            <div class="stat-label">Bayar masa terima</div>
+          </div>
         </div>
       </div>
-      <div class="col-lg-5" data-aos="fade-left">
-        <div class="feature-card p-4">
-          <div class="d-flex gap-3 mb-3"><i class="ti ti-clock text-green fs-3"></i><div><strong>30-45 minit</strong><br><small class="text-secondary">Penghantaran pantas</small></div></div>
-          <div class="d-flex gap-3 mb-3"><i class="ti ti-map-pin text-green fs-3"></i><div><strong>Kawasan Melaka</strong><br><small class="text-secondary">Coverage luas</small></div></div>
-          <div class="d-flex gap-3"><i class="ti ti-truck text-green fs-3"></i><div><strong>Free delivery &gt; RM30</strong><br><small class="text-secondary">Jimat kos</small></div></div>
+      <div class="col-lg-5 offset-lg-1" data-aos="fade-left" data-aos-duration="800" data-aos-delay="150">
+        <div class="hero-card">
+          <div class="live-badge">
+            <span class="live-dot"></span>
+            Sistem Aktif
+          </div>
+          <div class="info-row">
+            <div class="info-icon"><i class="ti ti-clock"></i></div>
+            <div class="info-text">
+              <strong>30–45 Minit</strong>
+              <small>Penghantaran pantas ke pintu anda</small>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon"><i class="ti ti-map-pin"></i></div>
+            <div class="info-text">
+              <strong>Seluruh Kawasan Melaka</strong>
+              <small>Coverage luas, di mana sahaja anda berada</small>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon"><i class="ti ti-truck"></i></div>
+            <div class="info-text">
+              <strong>Free Delivery ≥ RM30</strong>
+              <small>Jimat lebih bila order lebih banyak</small>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon"><i class="ti ti-route"></i></div>
+            <div class="info-text">
+              <strong>Track Order Real-time</strong>
+              <small>Pantau status penghantaran anda live</small>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- HOW IT WORKS -->
 <section id="how" class="py-5">
-  <div class="container py-5">
-    <h2 class="text-center fw-bold mb-5" data-aos="fade-up">How It Works</h2>
-    <div class="row g-4">
+  <div class="container" style="padding: 80px 0">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <div class="section-label">Cara Ia Berfungsi</div>
+      <h2 class="section-title">Semudah 3 Langkah</h2>
+      <div class="divider"></div>
+      <p class="section-desc mt-4">Dari order hingga sampai ke tangan anda — proses yang cepat, mudah, dan telus.</p>
+    </div>
+    <div class="row g-4 position-relative">
       <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
-        <div class="feature-card text-center"><div class="step-num mx-auto mb-3">1</div><h5>Customer Order</h5><p class="text-secondary small">Pilih menu, isi alamat, bayar COD atau online. Tiada login diperlukan.</p></div>
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h5>Pelanggan Order</h5>
+          <p>Pilih menu kegemaran, isi alamat penghantaran, dan bayar secara COD atau online. Tiada akaun diperlukan.</p>
+          <div class="step-connector"></div>
+        </div>
       </div>
       <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-        <div class="feature-card text-center"><div class="step-num mx-auto mb-3">2</div><h5>Admin Assign</h5><p class="text-secondary small">Admin terima notifikasi, assign runner yang tersedia untuk pickup.</p></div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h5>Admin Assign Runner</h5>
+          <p>Admin terima notifikasi segera, semak pesanan, dan assign runner yang tersedia untuk pickup dalam masa singkat.</p>
+          <div class="step-connector"></div>
+        </div>
       </div>
       <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-        <div class="feature-card text-center"><div class="step-num mx-auto mb-3">3</div><h5>Runner Hantar</h5><p class="text-secondary small">Runner update status real-time. Customer track order sehingga sampai.</p></div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h5>Runner Hantar & Track</h5>
+          <p>Runner update status perjalanan secara real-time. Pelanggan boleh track order dari pickup hingga sampai.</p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<section id="features" class="py-5 bg-black bg-opacity-25">
-  <div class="container py-4">
-    <h2 class="text-center fw-bold mb-5">Features</h2>
+<!-- FEATURES -->
+<section id="features">
+  <div class="container" style="padding: 80px 0">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <div class="section-label">Ciri-ciri Platform</div>
+      <h2 class="section-title">Semua Yang Anda Perlukan</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="0">
+        <div class="feature-icon"><i class="ti ti-shopping-cart"></i></div>
+        <h6>Guest Checkout</h6>
+        <p>Order tanpa perlu daftar akaun. Cepat dan mudah.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="60">
+        <div class="feature-icon"><i class="ti ti-route"></i></div>
+        <h6>Runner Assignment</h6>
+        <p>Admin assign runner dengan satu klik. Sistem cepat bertindak balas.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="120">
+        <div class="feature-icon"><i class="ti ti-map-pin"></i></div>
+        <h6>Live Tracking</h6>
+        <p>Track status order secara real-time dari pickup hingga penghantaran.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="180">
+        <div class="feature-icon"><i class="ti ti-chart-bar"></i></div>
+        <h6>Admin Dashboard</h6>
+        <p>Laporan jualan, analytics, dan pengurusan runner dalam satu panel.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="240">
+        <div class="feature-icon"><i class="ti ti-bell"></i></div>
+        <h6>Notifikasi Segera</h6>
+        <p>Admin dan runner terima notifikasi masa nyata untuk setiap pesanan baru.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+        <div class="feature-icon"><i class="ti ti-cash"></i></div>
+        <h6>Bayaran Fleksibel</h6>
+        <p>Sokong bayaran COD. Jimat dan mudah untuk semua pelanggan.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="360">
+        <div class="feature-icon"><i class="ti ti-device-mobile"></i></div>
+        <h6>Mobile Friendly</h6>
+        <p>Rekabentuk responsif — berfungsi lancar di telefon dan tablet.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="420">
+        <div class="feature-icon"><i class="ti ti-history"></i></div>
+        <h6>Sejarah Pesanan</h6>
+        <p>Runner dan admin boleh semak rekod pesanan lepas dengan mudah.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="trust" style="padding: 80px 0; background: var(--dark2);">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <div class="section-label">Testimonial</div>
+      <h2 class="section-title">Apa Kata Mereka</h2>
+      <div class="divider"></div>
+    </div>
     <div class="row g-4">
-      <div class="col-md-6 col-lg-3"><div class="feature-card"><i class="ti ti-shopping-cart text-green fs-2 mb-3"></i><h6>Guest Checkout</h6><p class="text-secondary small mb-0">Order tanpa daftar akaun</p></div></div>
-      <div class="col-md-6 col-lg-3"><div class="feature-card"><i class="ti ti-route text-green fs-2 mb-3"></i><h6>Runner Assignment</h6><p class="text-secondary small mb-0">Assign runner dengan satu klik</p></div></div>
-      <div class="col-md-6 col-lg-3"><div class="feature-card"><i class="ti ti-map-pin text-green fs-2 mb-3"></i><h6>Live Tracking</h6><p class="text-secondary small mb-0">Track order secara real-time</p></div></div>
-      <div class="col-md-6 col-lg-3"><div class="feature-card"><i class="ti ti-chart-bar text-green fs-2 mb-3"></i><h6>Admin Dashboard</h6><p class="text-secondary small mb-0">Laporan & analytics lengkap</p></div></div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
+        <div class="trust-card">
+          <div class="stars">★★★★★</div>
+          <p>"Sangat mudah nak order. Tak perlu daftar akaun pun boleh buat pesanan. Makanan sampai dalam masa 35 minit je!"</p>
+          <div class="trust-author">
+            <div class="avatar">A</div>
+            <div>
+              <div class="author-name">Aisyah Rahman</div>
+              <div class="author-role">Pelanggan setia</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="trust-card">
+          <div class="stars">★★★★★</div>
+          <p>"Sebagai runner, app ni memudahkan kerja saya. Status update senang, dan assignment dari admin pun cepat."</p>
+          <div class="trust-author">
+            <div class="avatar">H</div>
+            <div>
+              <div class="author-name">Hafiz Syawal</div>
+              <div class="author-role">Runner Tracky</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="trust-card">
+          <div class="stars">★★★★★</div>
+          <p>"Dashboard admin sangat lengkap. Boleh tengok laporan harian, manage runner, dan track semua order dengan mudah."</p>
+          <div class="trust-author">
+            <div class="avatar">N</div>
+            <div>
+              <div class="author-name">Nurul Huda</div>
+              <div class="author-role">Pengurus Restoran</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="container py-5">
-  <div class="cta-section text-center p-5" data-aos="zoom-in">
-    <h2 class="fw-bold mb-3">Ready to Order?</h2>
-    <p class="mb-4 opacity-75">Pesan sekarang dari Restoran Selera Nusantara</p>
-    <a href="/tracky/" class="btn btn-light btn-lg fw-semibold">Order Sekarang</a>
+<!-- CTA -->
+<section class="container" style="padding: 60px 0 0">
+  <div class="cta-section" data-aos="zoom-in" data-aos-duration="600">
+    <h2>Bersedia Untuk Order?</h2>
+    <p>Dapatkan makanan lazat dari Restoran Selera Nusantara terus ke depan pintu anda.</p>
+    <a href="/tracky/customer/customer_restaurants.php" class="btn-cta-white">
+      <i class="ti ti-shopping-bag"></i> Lihat Menu & Order
+    </a>
   </div>
 </section>
 
+<!-- FOOTER -->
 <footer>
-  <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
-    <div class="fw-bold"><i class="ti ti-bike text-green"></i> Tracky</div>
-    <div class="d-flex gap-3 small">
-      <a href="/tracky/" class="text-secondary">Menu</a>
-      <a href="/tracky/track.php" class="text-secondary">Track</a>
-      <a href="/tracky/login.php" class="text-secondary">Log Masuk</a>
+  <div class="container">
+    <div class="row g-4 align-items-start">
+      <div class="col-md-4">
+        <div class="footer-brand"><img src="/tracky/assets/img/icon.png" alt="Tracky" style="width:28px;height:28px;border-radius:7px;object-fit:cover;vertical-align:middle;margin-right:8px">Trac<span style="color:var(--green)">ky</span></div>
+        <div class="footer-tagline">Platform penghantaran makanan untuk restoran di Melaka. Cepat, mudah, dan boleh dipercayai.</div>
+      </div>
+      <div class="col-md-4">
+        <div class="fw-600 text-white mb-3" style="font-size:0.85rem;font-weight:600">Pautan Pantas</div>
+        <div class="footer-links d-flex flex-column gap-2">
+          <a href="/tracky/customer/customer_restaurants.php"><i class="ti ti-chevron-right" style="font-size:0.7rem"></i> Lihat Menu</a>
+          <a href="/tracky/customer/customer_track.php"><i class="ti ti-chevron-right" style="font-size:0.7rem"></i> Track Pesanan</a>
+          <a href="#how"><i class="ti ti-chevron-right" style="font-size:0.7rem"></i> Cara Ia Berfungsi</a>
+          <a href="#features"><i class="ti ti-chevron-right" style="font-size:0.7rem"></i> Ciri-ciri</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="fw-600 text-white mb-3" style="font-size:0.85rem;font-weight:600">Akses Sistem</div>
+        <div class="footer-links d-flex flex-column gap-2">
+          <a href="/tracky/login.php"><i class="ti ti-layout-dashboard" style="font-size:0.85rem"></i> Login Admin</a>
+          <a href="/tracky/login.php"><i class="ti ti-bike" style="font-size:0.85rem"></i> Login Runner</a>
+        </div>
+      </div>
     </div>
-    <div class="text-secondary small">&copy; 2026 Tracky</div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Tracky. Hak cipta terpelihara.</span>
+      <span>Dibina dengan <i class="ti ti-heart" style="color:var(--green)"></i> di Melaka</span>
+    </div>
   </div>
 </footer>
 
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<script>AOS.init({ duration: 700, once: true });</script>
+<script src="/tracky/assets/js/theme.js"></script>
+<script>
+  AOS.init({ duration: 700, once: true, easing: 'ease-out-cubic' });
+  const navbar = document.getElementById('navbar');
+  const spySections = ['how', 'features', 'trust'];
+  const navLinks = document.querySelectorAll('.nav-link-item');
+
+  function updateNav() {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+    let current = '';
+    spySections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && window.scrollY >= el.offsetTop - 140) current = id;
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', current !== '' && a.getAttribute('href') === '#' + current);
+    });
+  }
+
+  window.addEventListener('scroll', updateNav);
+  updateNav();
+</script>
 </body>
 </html>
