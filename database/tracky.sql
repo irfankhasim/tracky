@@ -165,7 +165,6 @@ INSERT INTO categories (id, restaurant_id, name, description, is_active, sort_or
 (1, 1, 'Nasi & Lauk', 'Hidangan nasi pelbagai pilihan', 1, 1),
 (2, 1, 'Mee & Bihun', 'Mee goreng, mee sup dan banyak lagi', 1, 2),
 (3, 1, 'Minuman', 'Minuman sejuk dan panas', 1, 3),
-(4, 1, 'Dessert', 'Pencuci mulut pilihan', 1, 4),
 (5, 2, 'Western', 'Hidangan western pilihan', 1, 1),
 (6, 2, 'Minuman', 'Minuman sejuk dan panas', 1, 2);
 
@@ -179,9 +178,6 @@ INSERT INTO menu_items (restaurant_id, category_id, name, description, price, is
 (1, 2, 'Bihun Goreng', 'Bihun goreng dengan sayur dan telur', 8.00, 1, 'assets/uploads/menu/item_7.jpg'),
 (1, 3, 'Teh Tarik', 'Teh tarik panas atau sejuk', 3.50, 1, 'assets/uploads/menu/item_8.jpg'),
 (1, 3, 'Milo Ais', 'Milo sejuk yang menyegarkan', 4.00, 1, 'assets/uploads/menu/item_9.jpg'),
-(1, 3, 'Air Kosong', 'Air mineral sejuk', 1.50, 1, 'assets/uploads/menu/item_10.jpg'),
-(1, 4, 'Cendol', 'Cendol dengan santan dan gula melaka', 5.00, 1, 'assets/uploads/menu/item_11.jpg'),
-(1, 4, 'Ais Krim Potong', 'Ais krim potong pelbagai perisa', 3.00, 1, 'assets/uploads/menu/item_12.jpg'),
 (2, 5, 'Chicken Chop', 'Ayam dengan kentang dan sos lada hitam', 15.00, 1, 'assets/uploads/menu/item_13.jpg'),
 (2, 5, 'Spaghetti Bolognese', 'Spaghetti dengan sos daging', 13.00, 1, 'assets/uploads/menu/item_14.jpg'),
 (2, 5, 'Grilled Fish & Chips', 'Ikan panggang dengan kentang goreng', 16.00, 1, 'assets/uploads/menu/item_15.jpg'),
