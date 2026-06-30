@@ -794,6 +794,34 @@ body.light-mode .customer-navbar { background: rgba(248,250,252,0.9); }
 
 /* ── PAGE WRAP ── */
 .customer-page-wrap { max-width: 620px; margin: 0 auto; padding: 20px; }
+/* Wider variant for two-column pages (e.g. cart + checkout) so they breathe on desktop
+   while still stacking to full width on tablet/phone via Bootstrap col-lg-*. */
+.customer-page-wrap--wide { max-width: 1040px; }
+@media (min-width: 992px) {
+  .customer-page-wrap--wide .checkout-form { position: sticky; top: 84px; }
+}
+
+/* ── ADDRESS AUTOCOMPLETE + MAP ── */
+.addr-autocomplete { position: relative; }
+.addr-suggestions {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 1200;
+  background: var(--bg2); border: 1.5px solid var(--border); border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25); overflow: hidden; max-height: 260px; overflow-y: auto;
+}
+.addr-suggestion {
+  display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px;
+  font-size: 13px; color: var(--text-2); cursor: pointer; border-bottom: 1px solid var(--border);
+  line-height: 1.35;
+}
+.addr-suggestion:last-child { border-bottom: none; }
+.addr-suggestion:hover { background: var(--green-dim); color: var(--text); }
+.addr-suggestion i { color: var(--green); font-size: 15px; margin-top: 1px; flex-shrink: 0; }
+.delivery-map {
+  width: 100%; height: 240px; border-radius: 12px; overflow: hidden;
+  border: 1.5px solid var(--border); z-index: 1;
+}
+.leaflet-container { font-family: 'Inter', sans-serif; background: var(--bg3); }
+@media (max-width: 480px) { .delivery-map { height: 200px; } }
 
 /* ── BOOTSTRAP GLOBAL OVERRIDES ── */
 .text-muted { color: var(--muted) !important; }
@@ -844,3 +872,56 @@ small, .small { color: var(--muted); }
 @media (min-width: 768px) {
   .menu-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
 }
+
+/* ── SIMULATED PAYMENT GATEWAY (TrackyPay) ── */
+.paygw-wrap {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 24px 16px;
+}
+.paygw-card {
+  width: 100%; max-width: 440px; background: var(--bg2);
+  border: 1.5px solid var(--border); border-radius: 18px; padding: 24px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.28);
+}
+.paygw-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 18px;
+}
+.paygw-brand { font-size: 1.15rem; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.paygw-brand i { color: var(--green); }
+.paygw-secure { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.paygw-amount { text-align: center; margin-bottom: 20px; }
+.paygw-amount-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 700; }
+.paygw-amount-value { font-size: 2.2rem; font-weight: 800; color: var(--green); margin: 4px 0 2px; }
+.paygw-merchant { font-size: 12px; color: var(--muted); }
+.paygw-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.paygw-tab {
+  flex: 1; padding: 10px 8px; border-radius: 10px; border: 1.5px solid var(--border);
+  background: var(--bg3); color: var(--text-2); font-size: 12px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.2s;
+}
+.paygw-tab.active { border-color: var(--green); background: var(--green-dim); color: var(--text); }
+.paygw-panel { margin-bottom: 4px; }
+.paygw-error {
+  margin-top: 14px; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600;
+  background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #EF4444;
+}
+.paygw-cancel { display: block; text-align: center; margin-top: 14px; font-size: 13px; color: var(--muted); text-decoration: none; }
+.paygw-cancel:hover { color: var(--text); }
+.paygw-note {
+  margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--muted); line-height: 1.5;
+}
+.paygw-note i { color: var(--green); }
+.paygw-overlay {
+  position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+}
+.paygw-spinner {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.25); border-top-color: var(--green);
+  animation: paygw-spin 0.8s linear infinite;
+}
+@keyframes paygw-spin { to { transform: rotate(360deg); } }
+.paygw-overlay-text { color: #fff; font-size: 14px; font-weight: 600; }

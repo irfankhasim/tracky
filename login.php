@@ -11,7 +11,7 @@ if (isset($_SESSION['user_id'])) {
             header('Location: /tracky/admin/admin_dashboard.php');
             break;
         case 'staff':
-            header('Location: /tracky/staff/staff_dashboard.php');
+            header('Location: /tracky/admin/admin_dashboard.php');
             break;
         case 'runner':
             header('Location: /tracky/runner/runner_orders.php');
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header('Location: /tracky/admin/admin_dashboard.php');
                     break;
                 case 'staff':
-                    header('Location: /tracky/staff/staff_dashboard.php');
+                    header('Location: /tracky/admin/admin_dashboard.php');
                     break;
                 case 'runner':
                     header('Location: /tracky/runner/runner_orders.php');

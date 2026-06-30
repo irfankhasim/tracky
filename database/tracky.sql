@@ -79,11 +79,15 @@ CREATE TABLE orders (
   customer_name VARCHAR(100) NOT NULL,
   customer_phone VARCHAR(20) NOT NULL,
   delivery_address TEXT NOT NULL,
+  delivery_lat DECIMAL(10,7) NULL,
+  delivery_lng DECIMAL(10,7) NULL,
   subtotal DECIMAL(10,2) NOT NULL,
   delivery_fee DECIMAL(10,2) DEFAULT 5.00,
   total_amount DECIMAL(10,2) NOT NULL,
   payment_method ENUM('cash','online') DEFAULT 'cash',
   payment_status ENUM('pending','paid') DEFAULT 'pending',
+  payment_ref VARCHAR(50) NULL,
+  paid_at DATETIME NULL,
   status ENUM('pending','assigned','picked_up','in_transit','delivered','cancelled') DEFAULT 'pending',
   notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -140,22 +144,22 @@ CREATE TABLE notifications (
 
 -- ── Restaurants (multi-tenant) ──
 INSERT INTO restaurants (id, name, slug, address, phone, email, accent_color, cover_image) VALUES
-(1, 'Restoran Selera Nusantara', 'restoran-selera', 'No 5, Jalan Merdeka, Ayer Keroh, 75450 Melaka', '+60 6-234 5678', 'info@seleranusantara.com', '#1D9E75', 'assets/uploads/restaurants/cover_1.jpg'),
+(1, 'Restoran Pak Aba', 'restoran-pak-aba', 'No 5, Jalan Merdeka, Ayer Keroh, 75450 Melaka', '+60 6-234 5678', 'info@seleranusantara.com', '#1D9E75', 'assets/uploads/restaurants/cover_1.jpg'),
 (2, 'Warung Pak Abu', 'warung-pak-abu', 'No 12, Jalan Hang Tuah, 75300 Melaka', '+60 6-987 6543', 'hello@warungpakabu.com', '#1D9E75', 'assets/uploads/restaurants/cover_2.jpg'),
-(3, 'Restoran Pak Abu 2', 'restoran-pak-abu-2', 'No 8, Jalan Bukit Beruang, 75450 Melaka', '+60 6-231 2233', 'cawangan2@warungpakabu.com', '#1D9E75', 'assets/uploads/restaurants/cover_3.jpg');
+(3, 'Restoran Pak Ali', 'restoran-pak-ali', 'No 8, Jalan Bukit Beruang, 75450 Melaka', '+60 6-231 2233', 'cawangan2@warungpakabu.com', '#1D9E75', 'assets/uploads/restaurants/cover_3.jpg');
 
 -- ── Users ──
 -- superadmin: password = superadmin123  | admin: admin123 | runner: runner123 | staff: staff123
 INSERT INTO users (name, email, password, role, phone, restaurant_id) VALUES
-('System Owner', 'superadmin@tracky.com', '$2y$10$mEx1BVp9WxDfVnz5febSvOQkzbf0rdjPoh22iJbyfAuvelWasY1S.', 'superadmin', '+60 12-000 0000', NULL),
-('Admin Selera', 'admin@tracky.com', '$2y$10$pg/rjTa3qk.Pdi1QYjqrHOcgA3MCsnP9eGVGZiKwFp7eMdCMRkJaG', 'admin', '+60 12-111 1111', 1),
+('Sistem Owner', 'sistemowner@tracky.com', '$2y$10$mEx1BVp9WxDfVnz5febSvOQkzbf0rdjPoh22iJbyfAuvelWasY1S.', 'superadmin', '+60 12-000 0000', NULL),
+('Admin Pak Aba', 'admin@tracky.com', '$2y$10$pg/rjTa3qk.Pdi1QYjqrHOcgA3MCsnP9eGVGZiKwFp7eMdCMRkJaG', 'admin', '+60 12-111 1111', 1),
 ('Ahmad Runner', 'runner1@tracky.com', '$2y$10$JBO8zIgcyHKj..9v1PlzSuhbkuQZWOEbBCcW0pxOUorQIb4CBB8jK', 'runner', '+60 12-222 2222', 1),
 ('Siti Runner', 'runner2@tracky.com', '$2y$10$JBO8zIgcyHKj..9v1PlzSuhbkuQZWOEbBCcW0pxOUorQIb4CBB8jK', 'runner', '+60 12-333 3333', 1),
 ('Admin Pak Abu', 'admin2@tracky.com', '$2y$10$pg/rjTa3qk.Pdi1QYjqrHOcgA3MCsnP9eGVGZiKwFp7eMdCMRkJaG', 'admin', '+60 12-444 4444', 2),
 ('Zaki Runner', 'runner3@tracky.com', '$2y$10$JBO8zIgcyHKj..9v1PlzSuhbkuQZWOEbBCcW0pxOUorQIb4CBB8jK', 'runner', '+60 12-555 5555', 2),
-('Staf Selera', 'staffselera@tracky.com', '$2y$10$uKpUe8s0lKgZl9L9TIswIefSvrndw.NS78v1Y.XQMMilpXLy0uZie', 'staff', '+60 12-666 6666', 1),
+('Staf Pak Aba', 'staffselera@tracky.com', '$2y$10$uKpUe8s0lKgZl9L9TIswIefSvrndw.NS78v1Y.XQMMilpXLy0uZie', 'staff', '+60 12-666 6666', 1),
 ('Staf Pak Abu', 'staffpakabu@tracky.com', '$2y$10$uKpUe8s0lKgZl9L9TIswIefSvrndw.NS78v1Y.XQMMilpXLy0uZie', 'staff', '+60 12-777 7777', 2),
-('Admin Pak Abu 2', 'admin3@tracky.com', '$2y$10$pg/rjTa3qk.Pdi1QYjqrHOcgA3MCsnP9eGVGZiKwFp7eMdCMRkJaG', 'admin', '+60 12-888 8888', 3);
+('Admin Pak Ali', 'admin3@tracky.com', '$2y$10$pg/rjTa3qk.Pdi1QYjqrHOcgA3MCsnP9eGVGZiKwFp7eMdCMRkJaG', 'admin', '+60 12-888 8888', 3);
 
 INSERT INTO runners (user_id, restaurant_id, vehicle_no, phone, status) VALUES
 (3, 1, 'MKM 1234', '+60 12-222 2222', 'online'),

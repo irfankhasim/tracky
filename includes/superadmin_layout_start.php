@@ -43,7 +43,6 @@ if (!empty($_SESSION['user_id'])) {
       <img src="/tracky/assets/img/icon.png" alt="Tracky" class="brand-img">
       <span>Tracky</span>
     </div>
-    <div class="sidebar-restaurant"><span class="sa-role-badge"><i class="ti ti-shield-lock"></i> Superadmin</span></div>
     <nav class="sidebar-nav">
       <div class="nav-label">Utama</div>
       <a href="/tracky/superadmin/superadmin_dashboard.php" class="nav-item <?= $current === 'superadmin_dashboard.php' ? 'active' : '' ?>">

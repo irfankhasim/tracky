@@ -264,7 +264,6 @@ $total = count($restaurants);
   <div class="resto-hero-bg"></div>
   <div class="resto-hero-grid"></div>
   <div class="resto-hero-inner">
-    <span class="resto-badge"><i class="ti ti-tools-kitchen-2"></i> Tracky Food</span>
     <h1 class="resto-title">Pesan dari restoran <span class="hl">kegemaran anda</span></h1>
     <p class="resto-sub">Pelbagai restoran, satu platform. Pilih kedai, terokai menu, dan kami hantar terus ke pintu rumah anda.</p>
     <div class="resto-search">

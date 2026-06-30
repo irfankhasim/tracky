@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
-requireAdminApi();
+requireOpsApi();
 header('Content-Type: application/json; charset=utf-8');
 
 $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;

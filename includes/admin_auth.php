@@ -2,12 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'] ?? '', ['admin', 'superadmin'], true)) {
-    // Staff have a dedicated, restricted interface; send them there.
-    if (($_SESSION['role'] ?? '') === 'staff') {
-        header('Location: /tracky/staff/staff_dashboard.php');
-        exit();
-    }
+if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'] ?? '', ['admin', 'superadmin', 'staff'], true)) {
     header('Location: /tracky/login.php');
     exit();
 }

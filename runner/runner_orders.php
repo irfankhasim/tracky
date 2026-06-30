@@ -15,7 +15,7 @@ if (!$runner) {
 }
 
 $active = [];
-$astmt = mysqli_prepare($conn, "SELECT d.*, o.order_no, o.customer_name, o.customer_phone, o.delivery_address, o.total_amount, o.notes
+$astmt = mysqli_prepare($conn, "SELECT d.*, o.order_no, o.customer_name, o.customer_phone, o.delivery_address, o.delivery_lat, o.delivery_lng, o.total_amount, o.notes
   FROM deliveries d JOIN orders o ON o.id=d.order_id
   WHERE d.runner_id=? AND d.status IN ('assigned','picked_up','in_transit') ORDER BY d.assigned_at DESC");
 mysqli_stmt_bind_param($astmt, 'i', $runner_id);
@@ -121,7 +121,7 @@ $status = $runner['status'];
     <?php if ($o['action']): ?>
     <button class="btn w-100 runner-action-btn mb-2 <?= e($o['action']['class']) ?> btn-status" data-id="<?= (int)$o['id'] ?>" data-next="<?= e($o['action']['next']) ?>"><?= e($o['action']['label']) ?></button>
     <?php endif; ?>
-    <a href="https://maps.google.com/?q=<?= urlencode($o['delivery_address']) ?>" target="_blank" class="btn btn-outline-secondary w-100"><i class="ti ti-map-pin"></i> Navigate</a>
+    <a href="<?= e(mapNavUrl($o['delivery_address'], $o['delivery_lat'] ?? null, $o['delivery_lng'] ?? null)) ?>" target="_blank" rel="noopener" class="btn btn-outline-secondary w-100" onclick="window.open(this.href,'_blank','noopener');return false;"><i class="ti ti-brand-google-maps"></i> Navigate with Google Maps</a>
     <a href="/tracky/runner/runner_order_detail.php?id=<?= (int)$o['id'] ?>" class="btn btn-link btn-sm w-100 mt-1">Butiran penuh</a>
   </div>
   <?php endforeach; ?>

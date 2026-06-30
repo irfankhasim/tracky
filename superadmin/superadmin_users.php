@@ -4,7 +4,8 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 $page_title = 'Pengguna';
 $me = (int) $_SESSION['user_id'];
-$tab = ($_GET['tab'] ?? 'admins') === 'runners' ? 'runners' : 'admins';
+$tab = $_GET['tab'] ?? 'admins';
+if (!in_array($tab, ['admins', 'staff', 'runners'], true)) $tab = 'admins';
 $filter_rid = (int) ($_GET['restaurant'] ?? 0);
 
 // Restaurant options for assignment + filtering.
@@ -21,7 +22,8 @@ function saFlash(string $msg, string $type = 'success'): void
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
-    $post_tab = ($_POST['tab'] ?? 'admins') === 'runners' ? 'runners' : 'admins';
+    $post_tab = $_POST['tab'] ?? 'admins';
+    if (!in_array($post_tab, ['admins', 'staff', 'runners'], true)) $post_tab = 'admins';
 
     try {
         if ($action === 'add_user') {
@@ -168,9 +170,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $admin_where = $filter_rid > 0 ? " AND u.restaurant_id = $filter_rid" : '';
+$list_role = $tab === 'staff' ? 'staff' : 'admin';
 $admins = mysqli_query($conn, "SELECT u.id, u.name, u.email, u.phone, u.role, u.is_active, u.created_at, u.restaurant_id, res.name AS restaurant_name
   FROM users u LEFT JOIN restaurants res ON res.id = u.restaurant_id
-  WHERE u.role IN ('admin','staff')$admin_where ORDER BY u.created_at DESC");
+  WHERE u.role = '$list_role'$admin_where ORDER BY u.created_at DESC");
 $runner_where = $filter_rid > 0 ? " AND u.restaurant_id = $filter_rid" : '';
 $runners = mysqli_query($conn, "SELECT u.id, u.name, u.email, u.phone, u.is_active, u.restaurant_id, res.name AS restaurant_name, r.id AS runner_id, r.vehicle_no, r.status
   FROM users u LEFT JOIN runners r ON r.user_id = u.id LEFT JOIN restaurants res ON res.id = u.restaurant_id
@@ -187,10 +190,12 @@ require_once __DIR__ . '/../includes/superadmin_layout_start.php';
     <p>Urus akaun admin, staf dan runner</p>
   </div>
   <div class="page-header-right">
-    <?php if ($tab === 'admins'): ?>
-    <button class="btn-tracky" data-bs-toggle="modal" data-bs-target="#addUserModal" style="display:inline-flex;align-items:center;gap:8px"><i class="ti ti-user-plus"></i> Tambah Admin/Staf</button>
-    <?php else: ?>
+    <?php if ($tab === 'runners'): ?>
     <button class="btn-tracky" data-bs-toggle="modal" data-bs-target="#addRunnerModal" style="display:inline-flex;align-items:center;gap:8px"><i class="ti ti-user-plus"></i> Tambah Runner</button>
+    <?php elseif ($tab === 'staff'): ?>
+    <button class="btn-tracky" data-bs-toggle="modal" data-bs-target="#addUserModal" style="display:inline-flex;align-items:center;gap:8px"><i class="ti ti-users-plus"></i> Tambah Staf</button>
+    <?php else: ?>
+    <button class="btn-tracky" data-bs-toggle="modal" data-bs-target="#addUserModal" style="display:inline-flex;align-items:center;gap:8px"><i class="ti ti-user-plus"></i> Tambah User</button>
     <?php endif; ?>
   </div>
 </div>
@@ -203,7 +208,8 @@ require_once __DIR__ . '/../includes/superadmin_layout_start.php';
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2" style="margin-bottom:4px">
   <div class="orders-status-nav" style="margin-bottom:0">
-    <a href="?tab=admins<?= $filter_rid ? '&restaurant=' . $filter_rid : '' ?>" class="status-tab <?= $tab === 'admins' ? 'active' : '' ?>"><i class="ti ti-user-shield"></i> Admin &amp; Staf</a>
+    <a href="?tab=admins<?= $filter_rid ? '&restaurant=' . $filter_rid : '' ?>" class="status-tab <?= $tab === 'admins' ? 'active' : '' ?>"><i class="ti ti-user-shield"></i> Admin</a>
+    <a href="?tab=staff<?= $filter_rid ? '&restaurant=' . $filter_rid : '' ?>" class="status-tab <?= $tab === 'staff' ? 'active' : '' ?>"><i class="ti ti-users"></i> Staf</a>
     <a href="?tab=runners<?= $filter_rid ? '&restaurant=' . $filter_rid : '' ?>" class="status-tab <?= $tab === 'runners' ? 'active' : '' ?>"><i class="ti ti-bike"></i> Runner</a>
   </div>
   <form method="get" class="d-flex align-items-center gap-2">
@@ -217,14 +223,14 @@ require_once __DIR__ . '/../includes/superadmin_layout_start.php';
   </form>
 </div>
 
-<?php if ($tab === 'admins'): ?>
+<?php if ($tab !== 'runners'): ?>
 <div class="card">
   <div class="table-responsive">
     <table class="table mb-0">
       <thead><tr><th>Nama</th><th>Restoran</th><th>Peranan</th><th>Telefon</th><th>Status</th><th>Tindakan</th></tr></thead>
       <tbody>
       <?php if (mysqli_num_rows($admins) === 0): ?>
-        <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">Tiada akaun admin/staf</td></tr>
+        <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">Tiada akaun <?= $tab === 'staff' ? 'staf' : 'admin' ?></td></tr>
       <?php else: while ($u = mysqli_fetch_assoc($admins)): ?>
         <tr>
           <td>
@@ -242,11 +248,11 @@ require_once __DIR__ . '/../includes/superadmin_layout_start.php';
             <button type="button" class="btn-icon primary btn-edit-user" data-id="<?= $u['id'] ?>" data-name="<?= e($u['name']) ?>" data-email="<?= e($u['email']) ?>" data-phone="<?= e($u['phone']) ?>" data-restaurant="<?= (int)$u['restaurant_id'] ?>"><i class="ti ti-edit"></i></button>
             <button type="button" class="btn-icon btn-reset-pass" data-id="<?= $u['id'] ?>" data-name="<?= e($u['name']) ?>"><i class="ti ti-key"></i></button>
             <form method="post" class="d-inline">
-              <input type="hidden" name="action" value="toggle_active"><input type="hidden" name="tab" value="admins"><input type="hidden" name="id" value="<?= $u['id'] ?>">
+              <input type="hidden" name="action" value="toggle_active"><input type="hidden" name="tab" value="<?= $tab ?>"><input type="hidden" name="id" value="<?= $u['id'] ?>">
               <button class="btn-icon" <?= $u['id'] == $me ? 'disabled' : '' ?> title="Aktif/Gantung"><i class="ti ti-<?= $u['is_active'] ? 'ban' : 'circle-check' ?>"></i></button>
             </form>
             <form method="post" class="d-inline" onsubmit="return confirm('Padam akaun ini?')">
-              <input type="hidden" name="action" value="delete_user"><input type="hidden" name="tab" value="admins"><input type="hidden" name="id" value="<?= $u['id'] ?>">
+              <input type="hidden" name="action" value="delete_user"><input type="hidden" name="tab" value="<?= $tab ?>"><input type="hidden" name="id" value="<?= $u['id'] ?>">
               <button class="btn-icon danger" <?= $u['id'] == $me ? 'disabled' : '' ?>><i class="ti ti-trash"></i></button>
             </form>
           </div></td>
@@ -303,16 +309,16 @@ require_once __DIR__ . '/../includes/superadmin_layout_start.php';
 </div>
 <?php endif; ?>
 
-<!-- Add Admin/Staff Modal -->
+<!-- Add User Modal -->
 <div class="modal fade" id="addUserModal"><div class="modal-dialog"><form method="post" class="modal-content">
-  <div class="modal-header"><h5 class="modal-title">Tambah Admin / Staf</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-header"><h5 class="modal-title"><?= $tab === 'staff' ? 'Tambah Staf' : 'Tambah User' ?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body">
-    <input type="hidden" name="action" value="add_user"><input type="hidden" name="tab" value="admins">
+    <input type="hidden" name="action" value="add_user"><input type="hidden" name="tab" value="<?= $tab ?>">
     <div class="mb-3"><label class="form-label">Nama Penuh</label><input name="name" class="form-control" required></div>
     <div class="mb-3"><label class="form-label">Email</label><input name="email" type="email" class="form-control" required></div>
     <div class="mb-3"><label class="form-label">No. Telefon</label><input name="phone" class="form-control"></div>
     <div class="mb-3"><label class="form-label">Peranan</label>
-      <select name="role" class="form-select"><option value="admin">Admin</option><option value="staff">Staf</option></select>
+      <select name="role" class="form-select"><option value="admin" <?= $tab !== 'staff' ? 'selected' : '' ?>>Admin</option><option value="staff" <?= $tab === 'staff' ? 'selected' : '' ?>>Staf</option></select>
     </div>
     <div class="mb-3"><label class="form-label">Restoran</label>
       <select name="restaurant_id" class="form-select" required>

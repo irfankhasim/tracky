@@ -16,6 +16,7 @@ if ($pc) {
     $pending_count = (int) mysqli_fetch_assoc($pc)['c'];
 }
 $is_superadmin = ($_SESSION['role'] ?? '') === 'superadmin';
+$is_staff = ($_SESSION['role'] ?? '') === 'staff';
 $all_restaurants = [];
 if ($is_superadmin) {
     $rrs = mysqli_query($conn, 'SELECT id, name FROM restaurants ORDER BY name ASC');
@@ -77,6 +78,7 @@ $current = basename($_SERVER['PHP_SELF']);
       <a href="/tracky/admin/admin_tracking.php" class="nav-item <?= $current === 'admin_tracking.php' ? 'active' : '' ?>">
         <i class="ti ti-map-pin"></i> Tracking
       </a>
+      <?php if (!$is_staff): ?>
       <div class="nav-label">Pengurusan</div>
       <a href="/tracky/admin/admin_runners.php" class="nav-item <?= $current === 'admin_runners.php' ? 'active' : '' ?>">
         <i class="ti ti-users"></i> Runners
@@ -87,9 +89,7 @@ $current = basename($_SERVER['PHP_SELF']);
       <a href="/tracky/admin/admin_reports.php" class="nav-item <?= $current === 'admin_reports.php' ? 'active' : '' ?>">
         <i class="ti ti-chart-bar"></i> Laporan
       </a>
-      <a href="/tracky/admin/admin_notifications.php" class="nav-item <?= $current === 'admin_notifications.php' ? 'active' : '' ?>">
-        <i class="ti ti-bell"></i> Notifikasi
-      </a>
+      <?php endif; ?>
       <div class="nav-label">Akaun</div>
       <?php if (($_SESSION['role'] ?? '') === 'superadmin'): ?>
       <a href="/tracky/superadmin/superadmin_dashboard.php" class="nav-item">
@@ -108,7 +108,6 @@ $current = basename($_SERVER['PHP_SELF']);
         <div class="sidebar-avatar"><i class="ti ti-user-circle"></i></div>
         <div>
           <div class="sidebar-user-name"><?= e($_SESSION['name'] ?? '') ?></div>
-          <div class="sidebar-user-role"><?= e(ucfirst($_SESSION['role'] ?? '')) ?></div>
         </div>
       </div>
     </div>

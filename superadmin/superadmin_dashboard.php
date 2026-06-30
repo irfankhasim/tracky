@@ -33,7 +33,7 @@ require_once __DIR__ . '/../includes/superadmin_layout_start.php';
 ?>
 <div class="page-header">
   <div class="page-header-left">
-    <h4>Dashboard Superadmin</h4>
+    <h4>Dashboard Sistem Owner</h4>
     <p>Gambaran keseluruhan sistem Tracky</p>
   </div>
   <div class="page-header-right">

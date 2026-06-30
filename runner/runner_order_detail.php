@@ -14,7 +14,9 @@ if (!$row) { header('Location: /tracky/runner/runner_orders.php'); exit; }
 
 $items = getOrderItems($conn, (int)$row['order_id']);
 $action = nextRunnerAction($row['status']);
-$map = urlencode($row['delivery_address']);
+$map_embed = mapEmbedUrl($row['delivery_address'], $row['delivery_lat'] ?? null, $row['delivery_lng'] ?? null);
+$nav_url = mapNavUrl($row['delivery_address'], $row['delivery_lat'] ?? null, $row['delivery_lng'] ?? null);
+$has_coords = is_numeric($row['delivery_lat'] ?? null) && is_numeric($row['delivery_lng'] ?? null);
 ?>
 <!DOCTYPE html>
 <html lang="ms">
@@ -27,6 +29,7 @@ $map = urlencode($row['delivery_address']);
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
   <link href="<?= asset('assets/css/runner.css') ?>" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script>(function(){ if(localStorage.getItem('tracky-theme')==='light') document.documentElement.classList.add('pre-light'); })();</script>
@@ -53,10 +56,13 @@ $map = urlencode($row['delivery_address']);
   <?php if ($action): ?>
   <button class="btn w-100 runner-action-btn mt-2 <?= e($action['class']) ?>" id="btn-action" data-next="<?= e($action['next']) ?>"><?= e($action['label']) ?></button>
   <?php endif; ?>
-  <a href="https://maps.google.com/?q=<?= urlencode($row['delivery_address']) ?>" target="_blank" class="btn btn-outline-secondary w-100 mt-2"><i class="ti ti-map-pin"></i> Navigate</a>
+  <a href="<?= e($nav_url) ?>" target="_blank" rel="noopener" class="btn btn-outline-secondary w-100 mt-2" onclick="window.open(this.href,'_blank','noopener');return false;"><i class="ti ti-brand-google-maps"></i> Navigate with Google Maps</a>
+  <?php if (!$has_coords): ?>
+  <div class="small text-muted mt-2"><i class="ti ti-info-circle"></i> Lokasi tepat tiada — peta menggunakan alamat teks.</div>
+  <?php endif; ?>
   </div>
   <div class="map-wrap">
-  <iframe class="w-100 rounded border" height="260" src="https://maps.google.com/maps?q=<?= $map ?>&output=embed"></iframe>
+  <div id="rmap" style="width:100%;height:260px;border-radius:10px;overflow:hidden;border:1px solid var(--border,#2a2a2a)"></div>
   </div>
   </div>
 </div>
@@ -81,6 +87,28 @@ if (btn) btn.onclick = async () => {
     btn.disabled = false;
   }
 };
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  const el = document.getElementById('rmap');
+  if (!el || typeof L === 'undefined') return;
+  const lat = <?= is_numeric($row['delivery_lat'] ?? null) ? $row['delivery_lat'] : 'null' ?>;
+  const lng = <?= is_numeric($row['delivery_lng'] ?? null) ? $row['delivery_lng'] : 'null' ?>;
+  const address = <?= json_encode($row['delivery_address']) ?>;
+  function draw(la, lo) {
+    const map = L.map('rmap').setView([la, lo], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+    L.marker([la, lo]).addTo(map).bindPopup('Lokasi penghantaran');
+    setTimeout(() => map.invalidateSize(), 200);
+  }
+  if (lat !== null && lng !== null) { draw(lat, lng); }
+  else if (address) {
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=my&q=' + encodeURIComponent(address), { headers: { 'Accept': 'application/json' } })
+      .then(r => r.json()).then(d => { if (d && d.length) draw(+d[0].lat, +d[0].lon); else el.style.display = 'none'; })
+      .catch(() => { el.style.display = 'none'; });
+  } else { el.style.display = 'none'; }
+})();
 </script>
 <script src="<?= asset('assets/js/theme.js') ?>"></script>
 </body>

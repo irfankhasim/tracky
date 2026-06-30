@@ -272,6 +272,31 @@ function custRestaurantId(): int
     return (int) ($_SESSION['cust_restaurant_id'] ?? 0);
 }
 
+/**
+ * Build a Google Maps EMBED url (iframe) for a delivery location.
+ * Uses precise lat/lng when available (exact pin); falls back to text address.
+ */
+function mapEmbedUrl(?string $address, $lat = null, $lng = null): string
+{
+    if (is_numeric($lat) && is_numeric($lng)) {
+        return 'https://maps.google.com/maps?q=' . $lat . ',' . $lng . '&z=17&output=embed';
+    }
+    return 'https://maps.google.com/maps?q=' . urlencode((string) $address) . '&output=embed';
+}
+
+/**
+ * Build a Google Maps DIRECTIONS url ("Navigate"). When opened, Google computes
+ * the route, ETA and distance from the user's (runner's) current location.
+ * Uses precise coordinates when available; otherwise the text address.
+ */
+function mapNavUrl(?string $address, $lat = null, $lng = null): string
+{
+    if (is_numeric($lat) && is_numeric($lng)) {
+        return 'https://www.google.com/maps/dir/?api=1&destination=' . $lat . ',' . $lng;
+    }
+    return 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode((string) $address);
+}
+
 function deliveryFeeForSubtotal(array $restaurant, float $subtotal): float
 {
     $fee = (float) ($restaurant['delivery_fee'] ?? 5);
@@ -285,6 +310,23 @@ function requireAdminApi(): void
         session_start();
     }
     if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'] ?? '', ['admin', 'superadmin'], true)) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+        exit;
+    }
+}
+
+/**
+ * Operational API guard: admin, superadmin AND staff are allowed.
+ * Used by order/assign/tracking/dashboard/notification endpoints that staff
+ * may use. Management endpoints (edit menu/runner) keep requireAdminApi().
+ */
+function requireOpsApi(): void
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'] ?? '', ['admin', 'superadmin', 'staff'], true)) {
         header('Content-Type: application/json');
         echo json_encode(['success' => false, 'error' => 'Unauthorized']);
         exit;

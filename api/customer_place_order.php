@@ -26,6 +26,18 @@ $payment_method = in_array($_POST['payment_method'] ?? '', ['cash', 'online'], t
     ? $_POST['payment_method']
     : 'cash';
 
+// Optional delivery coordinates (from Places autocomplete / map pin). Both or none.
+$delivery_lat = (isset($_POST['delivery_lat']) && $_POST['delivery_lat'] !== '' && is_numeric($_POST['delivery_lat']))
+    ? (float) $_POST['delivery_lat'] : null;
+$delivery_lng = (isset($_POST['delivery_lng']) && $_POST['delivery_lng'] !== '' && is_numeric($_POST['delivery_lng']))
+    ? (float) $_POST['delivery_lng'] : null;
+if ($delivery_lat === null || $delivery_lng === null
+    || $delivery_lat < -90 || $delivery_lat > 90
+    || $delivery_lng < -180 || $delivery_lng > 180) {
+    $delivery_lat = null;
+    $delivery_lng = null;
+}
+
 if (strlen($customer_name) < 3) {
     echo json_encode(['success' => false, 'message' => 'Nama mesti sekurang-kurangnya 3 aksara']);
     exit;
@@ -111,17 +123,19 @@ mysqli_begin_transaction($conn);
 
 $stmt = mysqli_prepare(
     $conn,
-    "INSERT INTO orders (restaurant_id, order_no, customer_name, customer_phone, delivery_address, subtotal, delivery_fee, total_amount, payment_method, payment_status, status, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending', ?)"
+    "INSERT INTO orders (restaurant_id, order_no, customer_name, customer_phone, delivery_address, delivery_lat, delivery_lng, subtotal, delivery_fee, total_amount, payment_method, payment_status, status, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending', ?)"
 );
 mysqli_stmt_bind_param(
     $stmt,
-    'issssdddss',
+    'issssdddddss',
     $cust_rid,
     $order_no,
     $customer_name,
     $customer_phone,
     $delivery_address,
+    $delivery_lat,
+    $delivery_lng,
     $subtotal,
     $delivery_fee,
     $total,

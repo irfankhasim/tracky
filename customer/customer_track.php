@@ -21,7 +21,7 @@ if ($order_no) {
 }
 $steps = ['pending','assigned','picked_up','in_transit','delivered'];
 $status = $order['status'] ?? '';
-$map_addr = $order ? urlencode($order['delivery_address']) : '';
+$map_embed = $order ? mapEmbedUrl($order['delivery_address'], $order['delivery_lat'] ?? null, $order['delivery_lng'] ?? null) : '';
 $order_restaurant = $order ? getRestaurant($conn, (int) ($order['restaurant_id'] ?? 0)) : null;
 $accent_color = $order_restaurant['accent_color'] ?? '#1D9E75';
 
@@ -39,6 +39,7 @@ $statusIcon = $statusIcons[$status] ?? 'ti-clock';
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
   <link href="<?= asset('assets/css/customer.css') ?>" rel="stylesheet">
   <script>(function(){ if(localStorage.getItem('tracky-theme')==='light') document.documentElement.classList.add('pre-light'); })();</script>
   <style>html.pre-light body{background:#F8FAFC!important}</style>
@@ -200,9 +201,10 @@ $statusIcon = $statusIcons[$status] ?? 'ti-clock';
     </div>
     <?php endif; ?>
 
-    <?php if ($map_addr): ?>
-    <div style="margin-top:12px;border-radius:14px;overflow:hidden;border:1.5px solid var(--border)">
-      <iframe loading="lazy" src="https://maps.google.com/maps?q=<?= $map_addr ?>&output=embed" style="width:100%;height:260px;border:none;display:block"></iframe>
+    <?php if ($order): ?>
+    <div style="margin-top:12px">
+      <div id="trk-map" style="width:100%;height:260px;border-radius:14px;overflow:hidden;border:1.5px solid var(--border);background:var(--bg3)"></div>
+      <div id="trk-map-fallback" class="d-none small text-muted" style="margin-top:6px"><i class="ti ti-map-off"></i> Lokasi peta tidak tersedia untuk alamat ini.</div>
     </div>
     <?php endif; ?>
 
@@ -216,6 +218,41 @@ $statusIcon = $statusIcons[$status] ?? 'ti-clock';
 
 </div>
 
+<?php if ($order): ?>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  const el = document.getElementById('trk-map');
+  if (!el || typeof L === 'undefined') return;
+  const lat = <?= is_numeric($order['delivery_lat'] ?? null) ? $order['delivery_lat'] : 'null' ?>;
+  const lng = <?= is_numeric($order['delivery_lng'] ?? null) ? $order['delivery_lng'] : 'null' ?>;
+  const address = <?= json_encode($order['delivery_address']) ?>;
+  let map;
+
+  function draw(la, lo) {
+    map = L.map('trk-map').setView([la, lo], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+    L.marker([la, lo]).addTo(map).bindPopup('Lokasi penghantaran');
+    setTimeout(() => map.invalidateSize(), 200);
+  }
+  function fail() {
+    el.classList.add('d-none');
+    document.getElementById('trk-map-fallback').classList.remove('d-none');
+  }
+
+  if (lat !== null && lng !== null) {
+    draw(lat, lng);
+  } else if (address) {
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=my&q=' + encodeURIComponent(address), { headers: { 'Accept': 'application/json' } })
+      .then(r => r.json())
+      .then(d => { if (d && d.length) draw(+d[0].lat, +d[0].lon); else fail(); })
+      .catch(fail);
+  } else {
+    fail();
+  }
+})();
+</script>
+<?php endif; ?>
 <?php if ($order && $status !== 'delivered' && $status !== 'cancelled'): ?>
 <script>setInterval(()=>location.reload(),15000);</script>
 <?php endif; ?>

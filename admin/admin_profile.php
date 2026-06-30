@@ -50,6 +50,10 @@ mysqli_stmt_execute($cstmt);
 $order_count = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($cstmt))['c'];
 mysqli_stmt_close($cstmt);
 
+$roleLabels = ['admin' => 'Admin Restoran', 'superadmin' => 'Sistem Owner', 'staff' => 'Staf'];
+$roleLabel = $roleLabels[$user['role']] ?? ucfirst((string) $user['role']);
+$initials = strtoupper(mb_substr(trim($user['name']), 0, 2));
+
 require_once __DIR__ . '/../includes/admin_layout_start.php';
 ?>
 <div class="page-header">
@@ -65,7 +69,54 @@ require_once __DIR__ . '/../includes/admin_layout_start.php';
 </div>
 <?php endif; ?>
 
-<div class="two-col-layout">
+<!-- Profile hero -->
+<div class="card profile-hero">
+  <div class="card-body profile-hero-body">
+    <div class="profile-avatar"><?= e($initials) ?></div>
+    <div class="profile-hero-info">
+      <h4><?= e($user['name']) ?></h4>
+      <span class="profile-role-badge"><i class="ti ti-shield-check"></i> <?= e($roleLabel) ?></span>
+      <div class="profile-meta">
+        <span><i class="ti ti-mail"></i> <?= e($user['email']) ?></span>
+        <?php if (!empty($user['phone'])): ?><span><i class="ti ti-phone"></i> <?= e($user['phone']) ?></span><?php endif; ?>
+        <span><i class="ti ti-building-store"></i> <?= e($restaurant_name) ?></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid profile-stats">
+  <div class="stat-card">
+    <div class="d-flex align-items-center gap-3">
+      <div class="stat-icon blue"><i class="ti ti-shopping-bag"></i></div>
+      <div>
+        <div class="stat-label">Jumlah Order</div>
+        <div class="stat-value"><?= $order_count ?></div>
+      </div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="d-flex align-items-center gap-3">
+      <div class="stat-icon green"><i class="ti ti-user-check"></i></div>
+      <div>
+        <div class="stat-label">Peranan</div>
+        <div class="stat-value" style="font-size:1.05rem;line-height:1.3"><?= e($roleLabel) ?></div>
+      </div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="d-flex align-items-center gap-3">
+      <div class="stat-icon amber"><i class="ti ti-building-store"></i></div>
+      <div>
+        <div class="stat-label">Restoran</div>
+        <div class="stat-value" style="font-size:1.05rem;line-height:1.3"><?= e($restaurant_name) ?></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="two-col-layout profile-forms">
   <div>
     <div class="card">
       <div class="card-header">Maklumat Profil</div>
@@ -90,7 +141,7 @@ require_once __DIR__ . '/../includes/admin_layout_start.php';
     </div>
   </div>
   <div>
-    <div class="card mb-4">
+    <div class="card">
       <div class="card-header">Tukar Kata Laluan</div>
       <div class="card-body">
         <form method="post">
@@ -105,15 +156,6 @@ require_once __DIR__ . '/../includes/admin_layout_start.php';
           </div>
           <button class="btn-tracky"><i class="ti ti-lock"></i> Kemaskini Kata Laluan</button>
         </form>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="d-flex align-items-center gap-3">
-        <div class="stat-icon blue"><i class="ti ti-shopping-bag"></i></div>
-        <div>
-          <div class="stat-label">Total Orders (System)</div>
-          <div class="stat-value"><?= $order_count ?></div>
-        </div>
       </div>
     </div>
   </div>

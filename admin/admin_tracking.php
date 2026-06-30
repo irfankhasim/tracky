@@ -35,7 +35,7 @@ if ($order_id > 0) {
     }
 }
 $steps = ['pending','assigned','picked_up','in_transit','delivered'];
-$map = $order ? urlencode($order['delivery_address']) : '';
+$map = $order ? mapEmbedUrl($order['delivery_address'], $order['delivery_lat'] ?? null, $order['delivery_lng'] ?? null) : '';
 
 require_once __DIR__ . '/../includes/admin_layout_start.php';
 ?>
@@ -130,8 +130,9 @@ require_once __DIR__ . '/../includes/admin_layout_start.php';
     </div>
     <?php endif; ?>
 
-    <?php if ($map): ?>
-    <div class="map-container"><iframe src="https://maps.google.com/maps?q=<?= $map ?>&output=embed"></iframe></div>
+    <?php if ($order): ?>
+    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+    <div class="map-container"><div id="amap" style="width:100%;height:100%;min-height:260px;border-radius:10px;overflow:hidden"></div></div>
     <?php endif; ?>
   </div>
 </div>
@@ -160,4 +161,28 @@ setInterval(async () => {
 }, 10000);
 <?php endif; ?>
 </script>
+<?php if ($order): ?>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  const el = document.getElementById('amap');
+  if (!el || typeof L === 'undefined') return;
+  const lat = <?= is_numeric($order['delivery_lat'] ?? null) ? $order['delivery_lat'] : 'null' ?>;
+  const lng = <?= is_numeric($order['delivery_lng'] ?? null) ? $order['delivery_lng'] : 'null' ?>;
+  const address = <?= json_encode($order['delivery_address']) ?>;
+  function draw(la, lo) {
+    const map = L.map('amap').setView([la, lo], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+    L.marker([la, lo]).addTo(map).bindPopup('Lokasi penghantaran');
+    setTimeout(() => map.invalidateSize(), 200);
+  }
+  if (lat !== null && lng !== null) { draw(lat, lng); }
+  else if (address) {
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=my&q=' + encodeURIComponent(address), { headers: { 'Accept': 'application/json' } })
+      .then(r => r.json()).then(d => { if (d && d.length) draw(+d[0].lat, +d[0].lon); else el.style.display = 'none'; })
+      .catch(() => { el.style.display = 'none'; });
+  } else { el.style.display = 'none'; }
+})();
+</script>
+<?php endif; ?>
 <?php require_once __DIR__ . '/../includes/admin_layout_end.php'; ?>

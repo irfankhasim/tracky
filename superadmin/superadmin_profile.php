@@ -50,12 +50,18 @@ mysqli_stmt_execute($ustmt);
 $user = mysqli_fetch_assoc(mysqli_stmt_get_result($ustmt));
 mysqli_stmt_close($ustmt);
 
+$restaurant_count = (int) mysqli_fetch_assoc(mysqli_query($conn, 'SELECT COUNT(*) AS c FROM restaurants'))['c'];
+$user_count = (int) mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS c FROM users WHERE role IN ('admin','staff','runner')"))['c'];
+
+$roleLabel = 'Sistem Owner';
+$initials = strtoupper(mb_substr(trim($user['name']), 0, 2));
+
 require_once __DIR__ . '/../includes/superadmin_layout_start.php';
 ?>
 <div class="page-header">
   <div class="page-header-left">
     <h4>Profil Saya</h4>
-    <p>Urus maklumat akaun superadmin</p>
+    <p>Urus maklumat akaun anda</p>
   </div>
 </div>
 
@@ -65,7 +71,53 @@ require_once __DIR__ . '/../includes/superadmin_layout_start.php';
 </div>
 <?php endif; ?>
 
-<div class="two-col-layout">
+<!-- Profile hero -->
+<div class="card profile-hero">
+  <div class="card-body profile-hero-body">
+    <div class="profile-avatar"><?= e($initials) ?></div>
+    <div class="profile-hero-info">
+      <h4><?= e($user['name']) ?></h4>
+      <span class="profile-role-badge"><i class="ti ti-shield-check"></i> <?= e($roleLabel) ?></span>
+      <div class="profile-meta">
+        <span><i class="ti ti-mail"></i> <?= e($user['email']) ?></span>
+        <?php if (!empty($user['phone'])): ?><span><i class="ti ti-phone"></i> <?= e($user['phone']) ?></span><?php endif; ?>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid profile-stats">
+  <div class="stat-card">
+    <div class="d-flex align-items-center gap-3">
+      <div class="stat-icon blue"><i class="ti ti-building-store"></i></div>
+      <div>
+        <div class="stat-label">Jumlah Restoran</div>
+        <div class="stat-value"><?= $restaurant_count ?></div>
+      </div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="d-flex align-items-center gap-3">
+      <div class="stat-icon green"><i class="ti ti-users"></i></div>
+      <div>
+        <div class="stat-label">Jumlah Pengguna</div>
+        <div class="stat-value"><?= $user_count ?></div>
+      </div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="d-flex align-items-center gap-3">
+      <div class="stat-icon amber"><i class="ti ti-user-check"></i></div>
+      <div>
+        <div class="stat-label">Peranan</div>
+        <div class="stat-value" style="font-size:1.05rem;line-height:1.3"><?= e($roleLabel) ?></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="two-col-layout profile-forms">
   <div>
     <div class="card">
       <div class="card-header">Maklumat Profil</div>

@@ -111,21 +111,30 @@ $accent_color = $order_restaurant['accent_color'] ?? '#1D9E75';
       <h6>Pembayaran Tunai (COD)</h6>
       <p class="mb-0">Sila sediakan wang tunai sebanyak <strong>RM <?= number_format($total, 2) ?></strong> untuk dibayar kepada runner semasa penghantaran.</p>
     </div>
+    <?php elseif ($order['payment_status'] === 'paid'): ?>
+    <div class="payment-info online">
+      <i class="ti ti-circle-check-filled" style="color:#1D9E75;font-size:32px"></i>
+      <h6>Pembayaran Berjaya</h6>
+      <table class="bank-details">
+        <tr><td>Status</td><td><strong style="color:#1D9E75">DIBAYAR</strong></td></tr>
+        <tr><td>Jumlah</td><td><strong style="color:#1D9E75">RM <?= number_format($total, 2) ?></strong></td></tr>
+        <?php if (!empty($order['payment_ref'])): ?>
+        <tr><td>No. Rujukan</td><td><strong><?= e($order['payment_ref']) ?></strong></td></tr>
+        <?php endif; ?>
+        <?php if (!empty($order['paid_at'])): ?>
+        <tr><td>Masa Bayaran</td><td><strong><?= e(date('d M Y, h:i A', strtotime($order['paid_at']))) ?></strong></td></tr>
+        <?php endif; ?>
+      </table>
+      <p class="mt-2 text-muted small mb-0"><i class="ti ti-shield-check"></i> Dibayar melalui TrackyPay (simulasi).</p>
+    </div>
     <?php else: ?>
     <div class="payment-info online">
-      <i class="ti ti-building-bank" style="color:#1D9E75;font-size:32px"></i>
-      <h6>Butiran Pindahan Bank</h6>
-      <table class="bank-details">
-        <tr><td>Bank</td><td><strong>Maybank</strong></td></tr>
-        <tr><td>No. Akaun</td><td><strong>1234 5678 9012</strong></td></tr>
-        <tr><td>Nama</td><td><strong>Tracky Food Delivery</strong></td></tr>
-        <tr><td>Jumlah</td><td><strong style="color:#1D9E75">RM <?= number_format($total, 2) ?></strong></td></tr>
-        <tr><td>Rujukan</td><td><strong><?= e($order['order_no']) ?></strong></td></tr>
-      </table>
-      <p class="mt-2 text-muted small mb-0">
-        Sila hantar bukti pembayaran ke WhatsApp:
-        <a href="https://wa.me/60123456789?text=Bukti+bayaran+<?= urlencode($order['order_no']) ?>">012-345 6789</a>
-      </p>
+      <i class="ti ti-clock-dollar" style="color:#F59E0B;font-size:32px"></i>
+      <h6>Pembayaran Belum Selesai</h6>
+      <p class="mb-3">Pesanan anda belum dibayar. Sila selesaikan pembayaran sebanyak <strong>RM <?= number_format($total, 2) ?></strong> untuk diproses.</p>
+      <a href="/tracky/customer/customer_payment.php?order_no=<?= urlencode($order['order_no']) ?>" class="btn-tracky" style="margin:0">
+        <i class="ti ti-lock"></i> Bayar Sekarang
+      </a>
     </div>
     <?php endif; ?>
 

@@ -21,6 +21,7 @@ $cart_count = array_sum(array_column($_SESSION['cart'] ?? [], 'quantity'));
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
   <link href="<?= asset('assets/css/customer.css') ?>" rel="stylesheet">
   <script>(function(){ if(localStorage.getItem('tracky-theme')==='light') document.documentElement.classList.add('pre-light'); })();</script>
   <style>html.pre-light body{background:#F8FAFC!important}</style>
@@ -39,7 +40,7 @@ $cart_count = array_sum(array_column($_SESSION['cart'] ?? [], 'quantity'));
   </div>
 </nav>
 
-<div class="customer-page-wrap">
+<div class="customer-page-wrap customer-page-wrap--wide">
 
   <div id="empty-cart" class="d-none" style="text-align:center;padding:60px 20px">
     <i class="ti ti-shopping-cart-off" style="font-size:3rem;color:var(--muted);display:block;margin-bottom:12px"></i>
@@ -85,14 +86,28 @@ $cart_count = array_sum(array_column($_SESSION['cart'] ?? [], 'quantity'));
             <div class="mb-3">
               <label class="form-label" for="customer_phone">No. Telefon</label>
               <input type="tel" name="customer_phone" id="customer_phone" class="form-control" placeholder="cth: 0123456789" pattern="^(01)[0-9]{8,9}$" required>
-              <div style="font-size:11px;color:var(--muted);margin-top:4px">Format: 01x-xxxxxxxx</div>
               <div class="invalid-feedback"></div>
             </div>
             <div class="mb-3">
-              <label class="form-label" for="delivery_address">Alamat Penghantaran</label>
+              <label class="form-label" for="addr_search">Cari Alamat</label>
+              <div class="addr-autocomplete">
+                <input type="text" id="addr_search" class="form-control" placeholder="Taip nama jalan / taman / bandar..." autocomplete="off">
+                <div id="addr_suggestions" class="addr-suggestions d-none"></div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="delivery_address">Alamat Penghantaran Penuh</label>
               <textarea name="delivery_address" id="delivery_address" class="form-control" rows="3" placeholder="No rumah, jalan, taman, poskod, bandar" required minlength="10"></textarea>
               <div class="invalid-feedback"></div>
             </div>
+            <div id="map_block" class="mb-3 d-none">
+              <div id="delivery-map" class="delivery-map"></div>
+              <div id="coord_label" class="d-none" style="font-size:11px;color:var(--green);font-weight:600;margin-top:6px">
+                <i class="ti ti-map-pin-check"></i> Lokasi ditetapkan
+              </div>
+            </div>
+            <input type="hidden" name="delivery_lat" id="delivery_lat">
+            <input type="hidden" name="delivery_lng" id="delivery_lng">
             <div class="mb-3">
               <label class="form-label" for="notes">Nota untuk Runner <span style="color:var(--muted);font-weight:500;text-transform:none">(pilihan)</span></label>
               <textarea name="notes" id="notes" class="form-control" rows="2" placeholder="cth: Rumah pagar biru, tingkat 2, dll"></textarea>
@@ -140,6 +155,7 @@ $cart_count = array_sum(array_column($_SESSION['cart'] ?? [], 'quantity'));
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="<?= asset('assets/js/customer.js') ?>"></script>
 <script>
 const freeMin = <?= $freeMin ?>;
@@ -298,6 +314,8 @@ function submitOrder() {
     customer_name: document.getElementById('customer_name').value.trim(),
     customer_phone: document.getElementById('customer_phone').value.trim().replace(/[-\s]/g, ''),
     delivery_address: document.getElementById('delivery_address').value.trim(),
+    delivery_lat: document.getElementById('delivery_lat').value,
+    delivery_lng: document.getElementById('delivery_lng').value,
     notes: document.getElementById('notes').value.trim(),
     payment_method: document.querySelector('input[name="payment_method"]:checked').value,
     items: JSON.stringify(cartItemsCache),
@@ -311,8 +329,11 @@ function submitOrder() {
   .then(r => r.json())
   .then(data => {
     if (data.success) {
+      const dest = data.payment_method === 'online'
+        ? '/tracky/customer/customer_payment.php?order_no=' + encodeURIComponent(data.order_no)
+        : '/tracky/customer/customer_order_success.php?order_no=' + encodeURIComponent(data.order_no);
       fetch('/tracky/api/customer_cart.php', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, credentials: 'same-origin', body: 'action=clear' })
-      .finally(() => { window.location.href = '/tracky/customer/customer_order_success.php?order_no=' + encodeURIComponent(data.order_no); });
+      .finally(() => { window.location.href = dest; });
     } else {
       showAlert(data.message || 'Gagal membuat pesanan. Sila cuba semula.', 'danger');
       btn.disabled = false; btn.innerHTML = defaultHtml; updateSubmitState();
@@ -330,6 +351,91 @@ document.getElementById('submitBtn').addEventListener('click', submitOrder);
   document.getElementById(id).addEventListener('change', updateSubmitState);
 });
 document.querySelectorAll('input[name="payment_method"]').forEach(el => el.addEventListener('change', updateSubmitState));
+
+/* ── Alamat: Autocomplete (Nominatim/OSM) + Peta (Leaflet) — PERCUMA, tanpa API key ── */
+(function initAddressGeo() {
+  const searchEl = document.getElementById('addr_search');
+  const sugEl = document.getElementById('addr_suggestions');
+  const addrEl = document.getElementById('delivery_address');
+  const latEl = document.getElementById('delivery_lat');
+  const lngEl = document.getElementById('delivery_lng');
+  const mapBlock = document.getElementById('map_block');
+  const coordLabel = document.getElementById('coord_label');
+  let map = null, marker = null, debounce = null, controller = null;
+
+  function setCoords(lat, lng) {
+    latEl.value = (+lat).toFixed(7);
+    lngEl.value = (+lng).toFixed(7);
+    coordLabel.classList.remove('d-none');
+  }
+
+  function showMap(lat, lng) {
+    mapBlock.classList.remove('d-none');
+    if (!map) {
+      map = L.map('delivery-map').setView([lat, lng], 17);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19, attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+      marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+      marker.on('dragend', () => {
+        const p = marker.getLatLng();
+        setCoords(p.lat, p.lng);
+        reverseGeocode(p.lat, p.lng);
+      });
+    } else {
+      map.setView([lat, lng], 17);
+      marker.setLatLng([lat, lng]);
+    }
+    setTimeout(() => map.invalidateSize(), 150);
+  }
+
+  async function reverseGeocode(lat, lng) {
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&accept-language=ms&lat=${lat}&lon=${lng}`, { headers: { 'Accept': 'application/json' } });
+      const d = await r.json();
+      if (d && d.display_name) { addrEl.value = d.display_name; updateSubmitState(); }
+    } catch (_) { /* fallback: kekalkan alamat sedia ada */ }
+  }
+
+  function renderSuggestions(list) {
+    if (!list.length) { sugEl.classList.add('d-none'); sugEl.innerHTML = ''; return; }
+    sugEl.innerHTML = list.map((p, i) =>
+      `<div class="addr-suggestion" data-i="${i}"><i class="ti ti-map-pin"></i><span>${escapeHtml(p.display_name)}</span></div>`
+    ).join('');
+    sugEl.classList.remove('d-none');
+    sugEl.querySelectorAll('.addr-suggestion').forEach(el => {
+      el.onclick = () => {
+        const p = list[+el.dataset.i];
+        addrEl.value = p.display_name;
+        setCoords(p.lat, p.lon);
+        showMap(+p.lat, +p.lon);
+        sugEl.classList.add('d-none');
+        updateSubmitState();
+      };
+    });
+  }
+
+  async function searchAddr(q) {
+    if (controller) controller.abort();
+    controller = new AbortController();
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=my&accept-language=ms&q=${encodeURIComponent(q)}`;
+      const r = await fetch(url, { signal: controller.signal, headers: { 'Accept': 'application/json' } });
+      renderSuggestions(await r.json());
+    } catch (e) { if (e.name !== 'AbortError') sugEl.classList.add('d-none'); }
+  }
+
+  searchEl.addEventListener('input', () => {
+    const q = searchEl.value.trim();
+    clearTimeout(debounce);
+    if (q.length < 3) { sugEl.classList.add('d-none'); return; }
+    debounce = setTimeout(() => searchAddr(q), 450);
+  });
+  document.addEventListener('click', (e) => {
+    if (!sugEl.contains(e.target) && e.target !== searchEl) sugEl.classList.add('d-none');
+  });
+})();
+
 refreshCart();
 </script>
 <script src="<?= asset('assets/js/theme.js') ?>"></script>

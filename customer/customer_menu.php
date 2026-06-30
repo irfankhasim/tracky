@@ -73,7 +73,6 @@ $cart_count = array_sum(array_column($_SESSION['cart'], 'quantity'));
 
 <div class="hero-banner">
   <a href="/tracky/customer/customer_restaurants.php" class="hero-back"><i class="ti ti-arrow-left"></i> Semua Restoran</a>
-  <div class="hero-label"><i class="ti ti-bike"></i> Tracky Food</div>
   <h1 class="hero-title"><?= e($restaurant['name'] ?? 'Tracky') ?></h1>
   <p class="hero-sub">Pesan makanan kegemaran anda — kami hantar terus ke pintu rumah</p>
   <div class="hero-meta">

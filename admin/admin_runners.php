@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/admin_auth.php';
+require_once __DIR__ . '/../includes/block_staff.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 $page_title = 'Runners';
